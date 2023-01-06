@@ -20,6 +20,8 @@ install_requires = [
     'copulas>=0.7.0,<0.8',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
+    'pykeops>=2.1<3',
+    'geomloss>=0.2.5<1',
 ]
 
 pomegranate_requires = [
