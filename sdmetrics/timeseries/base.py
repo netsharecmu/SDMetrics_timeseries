@@ -5,6 +5,8 @@ from operator import attrgetter
 from sdmetrics.base import BaseMetric
 from sdmetrics.utils import get_columns_from_metadata
 
+import numpy as np
+
 
 class TimeSeriesMetric(BaseMetric):
     """Base class for metrics that apply to time series.
@@ -46,9 +48,42 @@ class TimeSeriesMetric(BaseMetric):
     }
 
     @classmethod
-    def _validate_inputs(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def _load_attribute_feature(cls, data, metadata=None, entity_columns=None):
+        '''Construct `data_attribute` and `data_feature`'''
+        attribute_cols = metadata['entity_columns'] + metadata['context_columns']
+        feature_cols = list(set(data.columns) - set(attribute_cols))
+
+        gk = data.groupby(attribute_cols)
+        # data_attribute
+        data_attribute = np.array(list(gk.groups.keys()))
+
+        # data_feature
+        max_sample_len = max(gk.size().values)
+        data_feature = []
+        for group_name, df_group in gk:
+            df_numpy = np.pad(
+                np.expand_dims(
+                    df_group[feature_cols].to_numpy(), axis=0),
+                pad_width=(
+                    (0, 0), (0, max_sample_len-len(df_group)), (0, 0)),
+                mode="constant",
+                constant_values=0
+            )
+            data_feature.append(df_numpy)
+        data_feature = np.concatenate(data_feature, axis=0)
+
+        # data_gen_flag: indicating timeseries with unequal length
+        data_gen_flag = (np.count_nonzero(
+            data_feature, axis=2) > 0).astype(int)
+
+        return data_attribute, data_feature, data_gen_flag
+
+    @classmethod
+    def _validate_inputs(
+            cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         if set(real_data.columns) != set(synthetic_data.columns):
-            raise ValueError('`real_data` and `synthetic_data` must have the same columns')
+            raise ValueError(
+                '`real_data` and `synthetic_data` must have the same columns')
 
         if metadata is not None:
             if not isinstance(metadata, dict):
@@ -65,14 +100,16 @@ class TimeSeriesMetric(BaseMetric):
 
         else:
             dtype_kinds = real_data.dtypes.apply(attrgetter('kind'))
-            metadata = {'fields': dtype_kinds.apply(cls._DTYPES_TO_TYPES.get).to_dict()}
+            metadata = {'fields': dtype_kinds.apply(
+                cls._DTYPES_TO_TYPES.get).to_dict()}
 
         entity_columns = metadata.get('entity_columns', entity_columns or [])
 
         return metadata, entity_columns
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None,
+                entity_columns=None):
         """Compute this metric.
 
         Args:

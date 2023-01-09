@@ -5,12 +5,13 @@ from geomloss import SamplesLoss
 from typing import Literal, Optional, Dict, List
 from collections import Counter, OrderedDict
 from .distance import jsd, emd
+from sdmetrics.reports.utils import make_discrete_column_plot, make_continuous_column_plot
 
 
 def distribution_similarity(
     real_data: np.ndarray,
     synthetic_data: np.ndarray,
-    data_type: List[Literal['categorical', 'numeric']],
+    data_type: List[Literal['categorical', 'numerical']],
     comparison_type: Literal['quantitative', 'qualitative', 'both'],
     categorical_mapping: Optional[bool] = None
 ):
@@ -29,7 +30,7 @@ def distribution_similarity(
 
     assert real_data.shape[1] == synthetic_data.shape[1] == len(data_type), \
         "Real data and synthetic data must have the same dimension. " \
-        "Each dimension of data has to be speicified as `categorical` or `numeric`."
+        "Each dimension of data has to be speicified as `categorical` or `numerical`."
 
     output = []
 
@@ -41,21 +42,23 @@ def distribution_similarity(
                 "Categorical variable, `categorical_mapping` must be set."
             output.append(jsd(real_data, synthetic_data, categorical_mapping))
 
-        # numeric only
-        elif set(data_type) == {'numeric'}:
+        # numerical only
+        elif set(data_type) == {'numerical'}:
             output.append(emd(real_data, synthetic_data))
 
-        # categorical/numeric mixed: discretizing numeric variables
+        # categorical/numerical mixed: discretizing numerical variables
         # TODO: think of alternative strategy
-        elif set(data_type) == {'categorical', 'numeric'}:
+        elif set(data_type) == {'categorical', 'numerical'}:
             pass
         else:
             raise ValueError(
-                "Unsupported data type, only `categorical` and `numeric` are supported.")
+                "Unsupported data type, only `categorical` and `numerical` are supported.")
 
     # Qualitative
-    if comparison_type in ['qualitative', 'both']:
-        # 1D array
-        if real_data.shape[1] == 1:
+    # if comparison_type in ['qualitative', 'both']:
+    #     # 1D array
+    #     if real_data.shape[1] == 1:
+    #         if data_type[0] == 'categorical':
+    #             make_discrete_column_plot()
 
     return output
