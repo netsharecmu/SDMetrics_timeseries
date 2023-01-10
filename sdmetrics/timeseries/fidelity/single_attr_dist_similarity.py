@@ -32,6 +32,7 @@ class SingleAttrDistSimilarity(TimeSeriesMetric):
                     scores[column_name] = distribution_similarity(
                         real_data=real_column,
                         synthetic_data=synthetic_column,
+                        column_names=[column_name],
                         data_type=['categorical'],
                         comparison_type='both',
                         categorical_mapping=True
@@ -40,6 +41,7 @@ class SingleAttrDistSimilarity(TimeSeriesMetric):
                     scores[column_name] = distribution_similarity(
                         real_data=real_column,
                         synthetic_data=synthetic_column,
+                        column_names=[column_name],
                         data_type=['numerical'],
                         comparison_type='both',
                         categorical_mapping=True

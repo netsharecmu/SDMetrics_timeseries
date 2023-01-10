@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+import pandas as pd
 import torch
 from geomloss import SamplesLoss
 from typing import Literal, Optional, Dict, List
@@ -11,6 +12,7 @@ from sdmetrics.reports.utils import make_discrete_column_plot, make_continuous_c
 def distribution_similarity(
     real_data: np.ndarray,
     synthetic_data: np.ndarray,
+    column_names: List[str],
     data_type: List[Literal['categorical', 'numerical']],
     comparison_type: Literal['quantitative', 'qualitative', 'both'],
     categorical_mapping: Optional[bool] = None
@@ -28,8 +30,10 @@ def distribution_similarity(
         "Both real data and synthetic data must be 2D array. " \
         "For 1D array, use reshape(-1, 1) for conversion."
 
-    assert real_data.shape[1] == synthetic_data.shape[1] == len(data_type), \
+    assert real_data.shape[1] == synthetic_data.shape[1] \
+        == len(column_names) == len(data_type), \
         "Real data and synthetic data must have the same dimension. " \
+        "Each dimension of data has to be assigned a name. " \
         "Each dimension of data has to be speicified as `categorical` or `numerical`."
 
     output = []
@@ -55,10 +59,25 @@ def distribution_similarity(
                 "Unsupported data type, only `categorical` and `numerical` are supported.")
 
     # Qualitative
-    # if comparison_type in ['qualitative', 'both']:
-    #     # 1D array
-    #     if real_data.shape[1] == 1:
-    #         if data_type[0] == 'categorical':
-    #             make_discrete_column_plot()
+    if comparison_type in ['qualitative', 'both']:
+        # 1D array
+        if real_data.shape[1] == 1:
+            if data_type[0] == 'categorical':
+                output.append(make_discrete_column_plot(
+                    real_column=pd.Series(
+                        real_data.flatten(), name=column_names[0]),
+                    synthetic_column=pd.Series(
+                        synthetic_data.flatten(), name=column_names[0]),
+                    sdtype='categorical'))
+            elif data_type[0] == 'numerical':
+                output.append(make_continuous_column_plot(
+                    real_column=pd.Series(
+                        real_data.flatten(), name=column_names[0]),
+                    synthetic_column=pd.Series(
+                        synthetic_data.flatten(), name=column_names[0]),
+                    sdtype='numerical'
+                ))
+        # 2D array
+        # TODO:
 
     return output
