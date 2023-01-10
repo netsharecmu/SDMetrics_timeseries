@@ -22,6 +22,7 @@ def distribution_similarity(
     Inputs:
         Synthetic data (represented as a data array)
         Real data (represented as a data array)
+        Column names (name of each dimension in real/synthetic data)
         Data type (categorical, continuous)
         Type of comparison (quantitative, qualitative, both)
         Categorical mapping: search exact mapping of values
