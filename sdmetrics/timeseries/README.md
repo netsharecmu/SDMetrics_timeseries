@@ -1,5 +1,18 @@
 # Time Series Metrics
 
+## Installation
+Create and enter the anaconda virtual environment
+```Bash
+conda create --name <your_env_name> python=3.9
+conda activate <your_env_name>
+```
+
+Install packages and dependencies
+```
+pip3 install -e .
+```
+
+## Description
 The metrics found on this folder operate on individual tables which represent sequencial data.
 The tables need to be passed as two `pandas.DataFrame`s alongside optional lists of
 `entity_columns` and `context_columns` or a `metadata` dict which contains them.
