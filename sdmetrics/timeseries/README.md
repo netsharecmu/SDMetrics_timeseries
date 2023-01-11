@@ -50,6 +50,7 @@ scores = SingleAttrDistSimilarity.compute(real_data, synthetic_data, metadata)
 The output `scores` will contain two parts (if applicable) for each attribute/feature: (1) a numerical number (2) a visualization plot.
 
 ![example_distribution](../../resources/timeseries_sunglass_region_distribution.png)
+
 Example plot: distribution of `region` in the `sunglasses` demo data.
 
 
