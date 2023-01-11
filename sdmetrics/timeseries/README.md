@@ -9,6 +9,7 @@ conda activate <your_env_name>
 
 Install packages and dependencies
 ```
+pip3 install torch numpy
 pip3 install -e .
 ```
 

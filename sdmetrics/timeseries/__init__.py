@@ -6,6 +6,8 @@ from sdmetrics.timeseries.detection import LSTMDetection, TimeSeriesDetectionMet
 from sdmetrics.timeseries.efficacy import TimeSeriesEfficacyMetric
 from sdmetrics.timeseries.efficacy.classification import LSTMClassifierEfficacy
 from sdmetrics.timeseries.fidelity import SingleAttrDistSimilarity
+from sdmetrics.timeseries.fidelity import SessionLengthDistSimilarity
+from sdmetrics.timeseries.fidelity import FeatureDistSimilarity
 
 __all__ = [
     'base',
@@ -17,5 +19,7 @@ __all__ = [
     'LSTMDetection',
     'TimeSeriesEfficacyMetric',
     'LSTMClassifierEfficacy',
-    'SingleAttrDistSimilarity'
+    'SingleAttrDistSimilarity',
+    'SessionLengthDistSimilarity',
+    'FeatureDistSimilarity'
 ]
