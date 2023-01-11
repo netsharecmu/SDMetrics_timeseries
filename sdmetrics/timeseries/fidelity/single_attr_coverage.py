@@ -7,6 +7,8 @@ from sdmetrics.timeseries.utils import coverage
 
 
 class SingleAttrCoverage(TimeSeriesMetric):
+    """This measures, for a single metadata attribute (e.g., device type), what fraction of the true distribution support is covered in the synthetic data. The metric for measuring coverage differs for categorical and numeric distributions."""
+
     name = "Single attribute coverage"
     goal = Goal.MAXIMIZE
 
