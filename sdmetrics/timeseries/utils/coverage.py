@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Literal, Optional, Dict, List
 from collections import Counter, OrderedDict
+from sdmetrics.reports.utils import make_venn2_plot
 
 
 def jaccard_similarity(A: set, B: set):
@@ -92,3 +93,16 @@ def coverage(
         else:
             raise ValueError(
                 "Unsupported data type, only `categorical` and `numerical` are supported.")
+
+    # Qualitative
+    if comparison_type in ['qualitative', 'both']:
+        # 1D array
+        if real_data.shape[1] == 1:
+            if data_type[0] == 'categorical':
+                output.append(
+                    make_venn2_plot(
+                        real_support=real_support,
+                        synthetic_support=synthetic_support,
+                        column_name=column_names[0]))
+            elif data_type[0] == 'numerical':
+                pass

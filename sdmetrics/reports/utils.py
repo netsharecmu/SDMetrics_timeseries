@@ -7,10 +7,13 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2
 from pandas.core.tools.datetimes import _guess_datetime_format_for_array
 
 from sdmetrics.utils import (
-    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta, is_datetime)
+    get_alternate_keys, get_columns_from_metadata, get_type_from_column_meta,
+    is_datetime)
 
 DATACEBO_DARK = '#000036'
 DATACEBO_LIGHT = '#01E0C9'
@@ -64,6 +67,24 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
 VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
 
 
+def make_venn2_plot(
+        real_support: set, synthetic_support: set, column_name: str):
+    """Plot Venn diagrams of 2 sets (circles)"""
+    # TODO: convert matplotlib to plotly?
+    v = venn2([real_support, synthetic_support],
+              set_labels=('Real data', 'Synthetic data'))
+    v.get_label_by_id('10').set_text(
+        ', '.join(real_support - (real_support & synthetic_support)))
+    v.get_label_by_id('01').set_text(
+        ', '.join(synthetic_support - (real_support & synthetic_support)))
+    v.get_label_by_id('11').set_text(
+        ', '.join(real_support & synthetic_support))
+
+    plt.title(f"Coverage of real vs. synthetic Data for column {column_name}")
+
+    return v
+
+
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     """Plot the real and synthetic data for a categorical or boolean column.
 
@@ -85,8 +106,10 @@ def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     synthetic_data = pd.DataFrame({'values': synthetic_column.copy()})
     synthetic_data['Data'] = 'Synthetic'
 
-    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_real = round(
+        (real_column.isna().sum() / len(real_column)) * 100, 2)
+    missing_data_synthetic = round(
+        (synthetic_column.isna().sum() / len(synthetic_column)), 2)
 
     all_data = pd.concat([real_data, synthetic_data], axis=0, ignore_index=True)
 
@@ -153,8 +176,10 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
         plotly.graph_objects._figure.Figure
     """
     column_name = real_column.name if hasattr(real_column, 'name') else ''
-    missing_data_real = round((real_column.isna().sum() / len(real_column)) * 100, 2)
-    missing_data_synthetic = round((synthetic_column.isna().sum() / len(synthetic_column)), 2)
+    missing_data_real = round(
+        (real_column.isna().sum() / len(real_column)) * 100, 2)
+    missing_data_synthetic = round(
+        (synthetic_column.isna().sum() / len(synthetic_column)), 2)
 
     real_data = real_column.dropna()
     synthetic_data = synthetic_column.dropna()
@@ -172,18 +197,16 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     )
 
     fig.update_traces(
-        x=pd.to_datetime(fig.data[0].x) if sdtype == 'datetime' else fig.data[0].x,
-        fill='tozeroy',
+        x=pd.to_datetime(fig.data[0].x)
+        if sdtype == 'datetime' else fig.data[0].x, fill='tozeroy',
         hovertemplate='<b>Real</b><br>Value: %{x}<br>Frequency: %{y}<extra></extra>',
-        selector={'name': 'Real'}
-    )
+        selector={'name': 'Real'})
 
     fig.update_traces(
-        x=pd.to_datetime(fig.data[1].x) if sdtype == 'datetime' else fig.data[1].x,
-        fill='tozeroy',
+        x=pd.to_datetime(fig.data[1].x)
+        if sdtype == 'datetime' else fig.data[1].x, fill='tozeroy',
         hovertemplate='<b>Synthetic</b><br>Value: %{x}<br>Frequency: %{y}<extra></extra>',
-        selector={'name': 'Synthetic'}
-    )
+        selector={'name': 'Synthetic'})
 
     show_missing_values = missing_data_real > 0 or missing_data_synthetic > 0
 
@@ -232,11 +255,14 @@ def get_column_plot(real_data, synthetic_data, column_name, metadata):
     if column_name not in columns:
         raise ValueError(f"Column '{column_name}' not found in metadata.")
     elif 'type' not in columns[column_name] and 'sdtype' not in columns[column_name]:
-        raise ValueError(f"Metadata for column '{column_name}' missing 'type' information.")
+        raise ValueError(
+            f"Metadata for column '{column_name}' missing 'type' information.")
     if column_name not in real_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in real table data.")
+        raise ValueError(
+            f"Column '{column_name}' not found in real table data.")
     if column_name not in synthetic_data.columns:
-        raise ValueError(f"Column '{column_name}' not found in synthetic table data.")
+        raise ValueError(
+            f"Column '{column_name}' not found in synthetic table data.")
 
     sdtype = get_type_from_column_meta(columns[column_name])
     real_column = real_data[column_name]
@@ -265,7 +291,8 @@ def convert_to_datetime(column_data):
     if is_datetime(column_data):
         return column_data
 
-    dt_format = _guess_datetime_format_for_array(column_data.astype(str).to_numpy())
+    dt_format = _guess_datetime_format_for_array(
+        column_data.astype(str).to_numpy())
     return pd.to_datetime(column_data, format=dt_format)
 
 
@@ -299,8 +326,7 @@ def make_continuous_column_pair_plot(real_data, synthetic_data):
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR,
-    )
+        plot_bgcolor=BACKGROUND_COLOR,)
 
     return fig
 
@@ -334,10 +360,10 @@ def make_discrete_column_pair_plot(real_data, synthetic_data):
 
     fig.update_layout(
         title_text=f"Real vs Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        coloraxis={'colorscale': [DATACEBO_DARK, DATACEBO_LIGHT]},
-    )
+        coloraxis={'colorscale': [DATACEBO_DARK, DATACEBO_LIGHT]},)
 
-    fig.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1] + ' Data'))
+    fig.for_each_annotation(lambda a: a.update(
+        text=a.text.split('=')[-1] + ' Data'))
 
     return fig
 
@@ -371,8 +397,7 @@ def make_mixed_column_pair_plot(real_data, synthetic_data):
 
     fig.update_layout(
         title=f"Real vs. Synthetic Data for columns '{columns[0]}' and '{columns[1]}'",
-        plot_bgcolor=BACKGROUND_COLOR
-    )
+        plot_bgcolor=BACKGROUND_COLOR)
 
     return fig
 
@@ -394,27 +419,33 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
         plotly.graph_objects._figure.Figure
     """
     all_columns = get_columns_from_metadata(metadata)
-    invalid_columns = [column for column in column_names if column not in all_columns]
+    invalid_columns = [column for column in column_names
+                       if column not in all_columns]
     if invalid_columns:
-        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
+        raise ValueError(
+            f"Column(s) `{'`, `'.join(invalid_columns)}` not found in metadata.")
     else:
-        invalid_columns = [
-            column for column in column_names if (
-                'type' not in all_columns[column] and 'sdtype' not in all_columns[column])
-        ]
+        invalid_columns = [column for column in column_names if (
+            'type' not in all_columns[column] and 'sdtype' not in all_columns[column])]
         if invalid_columns:
-            raise ValueError(f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
-                             "missing 'type' information.")
+            raise ValueError(
+                f"Metadata for column(s) `{'`, `'.join(invalid_columns)}` "
+                "missing 'type' information.")
 
-    invalid_columns = [column for column in column_names if column not in real_data.columns]
+    invalid_columns = [column for column in column_names
+                       if column not in real_data.columns]
     if invalid_columns:
-        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
-                         'in the real table data.')
+        raise ValueError(
+            f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
+            'in the real table data.')
 
-    invalid_columns = [column for column in column_names if column not in synthetic_data.columns]
+    invalid_columns = [
+        column for column in column_names
+        if column not in synthetic_data.columns]
     if invalid_columns:
-        raise ValueError(f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
-                         'in the synthetic table data.')
+        raise ValueError(
+            f"Column(s) `{'`, `'.join(invalid_columns)}` not found "
+            'in the synthetic table data.')
 
     sdtypes = (
         get_type_from_column_meta(all_columns[column_names[0]]),
@@ -424,9 +455,11 @@ def get_column_pair_plot(real_data, synthetic_data, column_names, metadata):
     synthetic_data = synthetic_data[column_names]
 
     all_sdtypes = CONTINUOUS_SDTYPES + DISCRETE_SDTYPES
-    invalid_sdtypes = [sdtype for sdtype in sdtypes if sdtype not in all_sdtypes]
+    invalid_sdtypes = [sdtype for sdtype in sdtypes
+                       if sdtype not in all_sdtypes]
     if invalid_sdtypes:
-        raise ValueError(f"sdtype(s) of type `{'`, `'.join(invalid_sdtypes)}` not recognized.")
+        raise ValueError(
+            f"sdtype(s) of type `{'`, `'.join(invalid_sdtypes)}` not recognized.")
 
     if all([t in DISCRETE_SDTYPES for t in sdtypes]):
         return make_discrete_column_pair_plot(real_data, synthetic_data)
@@ -474,8 +507,10 @@ def discretize_table_data(real_data, synthetic_data, metadata):
             synthetic_col = synthetic_data[field_name]
             if field_type == 'datetime':
                 if real_col.dtype == 'O' and field_meta.get('format', ''):
-                    real_col = pd.to_datetime(real_col, format=field_meta['format'])
-                    synthetic_col = pd.to_datetime(synthetic_col, format=field_meta['format'])
+                    real_col = pd.to_datetime(
+                        real_col, format=field_meta['format'])
+                    synthetic_col = pd.to_datetime(
+                        synthetic_col, format=field_meta['format'])
 
                 real_col = pd.to_numeric(real_col)
                 synthetic_col = pd.to_numeric(synthetic_col)
@@ -486,13 +521,15 @@ def discretize_table_data(real_data, synthetic_data, metadata):
 
             binned_real[field_name] = binned_real_col
             binned_synthetic[field_name] = binned_synthetic_col
-            get_columns_from_metadata(binned_metadata)[field_name] = {'type': 'categorical'} if (
-                'type' in field_meta) else {'sdtype': 'categorical'}
+            get_columns_from_metadata(binned_metadata)[field_name] = {
+                'type': 'categorical'} if('type' in field_meta) else{
+                'sdtype': 'categorical'}
 
     return binned_real, binned_synthetic, binned_metadata
 
 
-def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, keys_to_skip=[]):
+def discretize_and_apply_metric(
+        real_data, synthetic_data, metadata, metric, keys_to_skip=[]):
     """Discretize the data and apply the given metric.
 
     Args:
@@ -518,14 +555,13 @@ def discretize_and_apply_metric(real_data, synthetic_data, metadata, metric, key
 
     alternate_keys = get_alternate_keys(metadata)
     non_id_cols = [
-        field for field, field_meta in get_columns_from_metadata(binned_metadata).items() if
-        (
-            get_type_from_column_meta(field_meta) in VALID_SDTYPES and
-            field != metadata.get('primary_key', '') and
-            not field_meta.get('pii', False) and
-            field not in alternate_keys
-        )
-    ]
+        field for field,
+        field_meta in get_columns_from_metadata(binned_metadata).items()
+        if(
+            get_type_from_column_meta(field_meta) in VALID_SDTYPES and field !=
+            metadata.get('primary_key', '')
+            and not field_meta.get('pii', False) and field not in
+            alternate_keys)]
     for columns in itertools.combinations(non_id_cols, r=2):
         sorted_columns = tuple(sorted(columns))
         if (
