@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Literal, Optional, Dict, List
 from collections import Counter, OrderedDict
-from sdmetrics.reports.utils import make_venn2_plot
+from sdmetrics.reports.utils import make_venn2_plot, make_overlap_range_1d_plot
 
 
 def jaccard_similarity(A: set, B: set):
@@ -105,4 +105,10 @@ def coverage(
                         synthetic_support=synthetic_support,
                         column_name=column_names[0]))
             elif data_type[0] == 'numerical':
-                pass
+                output.append(
+                    make_overlap_range_1d_plot(
+                        real_data=real_data.flatten(),
+                        synthetic_data=synthetic_data.flatten(),
+                        column_name=column_names[0]
+                    )
+                )

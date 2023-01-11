@@ -85,6 +85,20 @@ def make_venn2_plot(
     return v
 
 
+def make_overlap_range_1d_plot(real_data, synthetic_data, column_name: str):
+    fig = plt.figure()
+    plt.plot(real_data, [0.0]*len(real_data), '-b', label='Real data range')
+    plt.plot(
+        synthetic_data, [0.0] * (len(synthetic_data)),
+        '--g', label='Synthetic data range')
+    plt.xlabel(column_name)
+    plt.legend()
+    plt.gca().get_yaxis().set_visible(False)
+    plt.title(f"Coverage of real vs. synthetic Data for column {column_name}")
+
+    return fig
+
+
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     """Plot the real and synthetic data for a categorical or boolean column.
 
