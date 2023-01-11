@@ -7,8 +7,8 @@ from sdmetrics.timeseries.utils import pearson_corr
 
 
 class CrossFeatureCorrelation(TimeSeriesMetric):
-    name = "Feature distributional similarity"
-    goal = Goal.MINIMIZE
+    name = "Cross Feature Correlation"
+    goal = Goal.MAXIMIZE
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,

@@ -10,6 +10,7 @@ from sdmetrics.timeseries.fidelity import SingleAttrCoverage
 from sdmetrics.timeseries.fidelity import SessionLengthDistSimilarity
 from sdmetrics.timeseries.fidelity import FeatureDistSimilarity
 from sdmetrics.timeseries.fidelity import CrossFeatureCorrelation
+from sdmetrics.timeseries.fidelity import InterarrivalDistSimilarity
 
 __all__ = [
     'base',
@@ -25,5 +26,6 @@ __all__ = [
     'SingleAttrCoverage',
     'SessionLengthDistSimilarity',
     'FeatureDistSimilarity',
-    'CrossFeatureCorrelation'
+    'CrossFeatureCorrelation',
+    'InterarrivalDistSimilarity'
 ]
