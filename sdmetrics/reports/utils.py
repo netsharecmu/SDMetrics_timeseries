@@ -71,6 +71,8 @@ def make_venn2_plot(
         real_support: set, synthetic_support: set, column_name: str):
     """Plot Venn diagrams of 2 sets (circles)"""
     # TODO: convert matplotlib to plotly?
+
+    fig = plt.figure()
     v = venn2([real_support, synthetic_support],
               set_labels=('Real data', 'Synthetic data'))
     v.get_label_by_id('10').set_text(
@@ -82,7 +84,7 @@ def make_venn2_plot(
 
     plt.title(f"Coverage of real vs. synthetic Data for column {column_name}")
 
-    return v
+    return fig
 
 
 def make_overlap_range_1d_plot(real_data, synthetic_data, column_name: str):

@@ -22,7 +22,8 @@ install_requires = [
     'plotly>=5.10.0,<6',
     'pykeops>=2.1<3',
     'geomloss>=0.2.5<1',
-    'torch'
+    'torch',
+    'matplotlib-venn>=0.11.7<1'
 ]
 
 pomegranate_requires = [
