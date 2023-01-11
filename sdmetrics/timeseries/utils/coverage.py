@@ -112,3 +112,5 @@ def coverage(
                         column_name=column_names[0]
                     )
                 )
+
+    return output
