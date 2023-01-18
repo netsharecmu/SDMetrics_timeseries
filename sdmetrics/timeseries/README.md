@@ -47,7 +47,7 @@ my_report.generate(real_data, synthetic_data, metadata)
 ```
 which will generate a report containing numerical values and visual plots.
 
-**Want more metrics?** You can also manually apply any of the metrics in this library to your data. All the timeseries metrics operate on at least three inputs:
+**Want more metrics?** You can also manually apply any of the metrics in this library to your data. All the timeseries metrics operate on *at least* three inputs:
 
 * `real_data`: A `pandas.DataFrame` with the data from the real dataset.
 * `synthetic_data`: A `pandas.DataFrame` with the data from the synthetic dataset.
