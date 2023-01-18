@@ -113,3 +113,4 @@ information required by the metrics will not be populated.
 - [ ] Better plot information
 - [ ] More informative reports
 - [ ] Create plot examples for pcap/netflow/wiki
+- [ ] Write unit tests
