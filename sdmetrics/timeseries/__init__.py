@@ -12,6 +12,7 @@ from sdmetrics.timeseries.fidelity import FeatureDistSimilarity
 from sdmetrics.timeseries.fidelity import CrossFeatureCorrelation
 from sdmetrics.timeseries.fidelity import InterarrivalDistSimilarity
 from sdmetrics.timeseries.fidelity import PerFeatureAutocorrelation
+from sdmetrics.timeseries.fidelity import SingleAttrSingleFeatureCorrelation
 
 __all__ = [
     'base',
@@ -29,5 +30,6 @@ __all__ = [
     'FeatureDistSimilarity',
     'CrossFeatureCorrelation',
     'InterarrivalDistSimilarity',
-    'PerFeatureAutocorrelation'
+    'PerFeatureAutocorrelation',
+    'SingleAttrSingleFeatureCorrelation'
 ]
