@@ -23,7 +23,7 @@ class SingleAttrCoverage(TimeSeriesMetric):
             cls._load_attribute_feature(synthetic_data, metadata)
         scores = {}
         for column_name, real_column in real_data.items():
-            if column_name not in metadata['context_columns']:
+            if column_name not in metadata['entity_columns'] + metadata['context_columns']:
                 continue
             if column_name in metadata['fields']:
                 real_column = real_column.to_numpy().reshape(-1, 1)
