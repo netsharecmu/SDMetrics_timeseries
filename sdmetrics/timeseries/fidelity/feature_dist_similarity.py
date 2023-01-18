@@ -23,6 +23,7 @@ class FeatureDistSimilarity(TimeSeriesMetric):
         # From doc, datetime is also a feature and should be added to calculate the
         # distributional similarity. I cast the timestamp into unix integer
         # with unit (s)
+        # TODO: multi-feature distribution
         for column_name in feature_cols:
             if column_name == metadata["sequence_index"]:
                 real_data[column_name] = pd.to_datetime(
