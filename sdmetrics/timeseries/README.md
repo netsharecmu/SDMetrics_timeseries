@@ -34,6 +34,7 @@ TimeSeriesMetric.get_subclasses()
 ```
 
 ## Usage
+### Report (a set of metrics)
 Get started with **SDMetrics Reports** using some demo data,
 
 ```Python
@@ -47,6 +48,7 @@ my_report.generate(real_data, synthetic_data, metadata)
 ```
 which will generate a report containing numerical values and visual plots.
 
+### Single metric
 **Want more metrics?** You can also manually apply any of the metrics in this library to your data. All the timeseries metrics operate on *at least* three inputs:
 
 * `real_data`: A `pandas.DataFrame` with the data from the real dataset.
@@ -68,6 +70,19 @@ The output `scores` will contain two parts (if applicable) for each attribute/fe
 
 <img src="../../docs/images/timeseries_sunglass_region_distribution.png" width="480">
 
+### Single dataset
+For a quick check on real (or synthetic) dataset alone, you can use `SingleDatasetVisualize`:
+
+```Python
+from sdmetrics.demos import load_timeseries_demo
+from sdmetrics.reports.timeseries import SingleDatasetVisualize
+
+real_data, synthetic_data, metadata = load_timeseries_demo()
+
+my_report = SingleDatasetVisualize()
+my_report.visualize(real_data, metadata)
+```
+which will generate a set of plots to visualize the distribution of different fields.
 
 ---
 
