@@ -48,9 +48,8 @@ class QualityReport():
             out.write("="*80+"\n")
             out.write(f"Metric: {metric.name}\n")
             try:
-                ()+1
-                # self._print_scores(metric.compute(
-                #     real_data, synthetic_data, metadata), out)
+                self._print_scores(metric.compute(
+                    real_data, synthetic_data, metadata), out)
             except:
                 attribute_cols = metadata['entity_columns'] + metadata['context_columns']
                 feature_cols = list(set(real_data.columns) -

@@ -89,4 +89,5 @@ information required by the metrics will not be populated.
 - [ ] Convert matplotlib to plotly
 - [ ] Modify metadata def from SDV?
 - [ ] Better plot information
+- [ ] More informative reports
 - [ ] Create plot examples for pcap/netflow/wiki
