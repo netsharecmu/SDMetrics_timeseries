@@ -40,5 +40,5 @@ class CrossFeatureCorrelation(TimeSeriesMetric):
             synthetic_data[column_1].to_numpy(),
             synthetic_data[column_2].to_numpy())
 
-        scores[str(target)] = 1 - (real_corr - synthetic_corr) / 2
+        scores[str(target)] = 1 - (abs(real_corr - synthetic_corr)) / 2
         return scores
