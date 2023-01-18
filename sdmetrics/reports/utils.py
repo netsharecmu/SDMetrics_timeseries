@@ -101,6 +101,70 @@ def make_overlap_range_1d_plot(real_data, synthetic_data, column_name: str):
     return plt
 
 
+def make_discrete_column_plot_single(real_column, sdtype):
+    """Plot the real data for a categorical or boolean column.
+
+    Args:
+        real_column (pandas.Series):
+            The real data for the desired column.
+        sdtype (str):
+            The data type of the column.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    column_name = real_column.name if hasattr(real_column, 'name') else ''
+
+    real_data = pd.DataFrame({'values': real_column.copy()})
+    real_data['Data'] = 'Real'
+
+    missing_data_real = round(
+        (real_column.isna().sum() / len(real_column)) * 100, 2)
+
+    all_data = pd.concat([real_data], axis=0, ignore_index=True)
+
+    fig = px.histogram(
+        all_data,
+        x='values',
+        color='Data',
+        barmode='group',
+        color_discrete_sequence=[DATACEBO_DARK],
+        pattern_shape='Data',
+        pattern_shape_sequence=[''],
+        histnorm='probability density'
+    )
+
+    fig.update_traces(
+        hovertemplate='<b>Real</b><br>Frequency: %{y}<extra></extra>',
+        selector={'name': 'Real'}
+    )
+
+    show_missing_values = missing_data_real > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 1.0,
+            'y': 1.05,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%)'
+            ),
+        },
+    ]
+
+    fig.update_layout(
+        title=f"Real Data for column '{column_name}'",
+        xaxis_title='Category',
+        yaxis_title='Frequency',
+        plot_bgcolor=BACKGROUND_COLOR,
+        annotations=annotations,
+    )
+
+    return fig
+
+
 def make_discrete_column_plot(real_column, synthetic_column, sdtype):
     """Plot the real and synthetic data for a categorical or boolean column.
 
@@ -242,6 +306,68 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
 
     fig.update_layout(
         title=f'Real vs. Synthetic Data for column {column_name}',
+        xaxis_title='Value',
+        yaxis_title='Frequency',
+        plot_bgcolor=BACKGROUND_COLOR,
+        annotations=annotations,
+    )
+
+    return fig
+
+
+def make_continuous_column_plot_single(real_column, sdtype):
+    """Plot the real data for a numerical or datetime column.
+
+    Args:
+        real_column (pandas.Series):
+            The real data for the desired column.
+        sdtype (str):
+            The data type of the column.
+
+    Returns:
+        plotly.graph_objects._figure.Figure
+    """
+    column_name = real_column.name if hasattr(real_column, 'name') else ''
+    missing_data_real = round(
+        (real_column.isna().sum() / len(real_column)) * 100, 2)
+
+    real_data = real_column.dropna()
+
+    if sdtype == 'datetime':
+        real_data = real_data.astype('int64')
+        synthetic_data = synthetic_data.astype('int64')
+
+    fig = ff.create_distplot(
+        [real_data],
+        ['Real'],
+        show_hist=False,
+        show_rug=False,
+        colors=[DATACEBO_DARK]
+    )
+
+    fig.update_traces(
+        x=pd.to_datetime(fig.data[0].x)
+        if sdtype == 'datetime' else fig.data[0].x, fill='tozeroy',
+        hovertemplate='<b>Real</b><br>Value: %{x}<br>Frequency: %{y}<extra></extra>',
+        selector={'name': 'Real'})
+
+    show_missing_values = missing_data_real > 0
+
+    annotations = [] if not show_missing_values else [
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 1.0,
+            'y': 1.05,
+            'showarrow': False,
+            'text': (
+                f'*Missing Values: Real Data ({missing_data_real}%)'
+            ),
+        },
+    ]
+
+    fig.update_layout(
+        title=f'Real Data for column {column_name}',
         xaxis_title='Value',
         yaxis_title='Frequency',
         plot_bgcolor=BACKGROUND_COLOR,
