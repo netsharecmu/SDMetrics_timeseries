@@ -9,6 +9,7 @@ from .distance import jsd, emd
 from sdmetrics.reports.utils import make_discrete_column_plot, make_continuous_column_plot
 
 
+# TODO: Check emd error if real_data and synthetic_data is identical.
 def distribution_similarity(
     real_data: np.ndarray,
     synthetic_data: np.ndarray,
