@@ -38,7 +38,7 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
                                                       [0.0] * (max_length - len(df_group)))
 
         real_interarrival_within_flow_list = np.asarray(
-            real_interarrival_within_flow_list).reshape(-1, max_length)
+            real_interarrival_within_flow_list).reshape(-1, 1)
 
         for group_name, df_group in synthetic_gk:
             synthetic_interarrival_within_flow_list.append([0.0] +
@@ -46,22 +46,18 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
                                                            [0.0] * (max_length - len(df_group)))
 
         synthetic_interarrival_within_flow_list = np.asarray(
-            synthetic_interarrival_within_flow_list).reshape(-1, max_length)
+            synthetic_interarrival_within_flow_list).reshape(-1, 1)
 
-        column_names = [f"interarrival_{i}" for i in range(max_length)]
-        date_type = ['numerical' for i in range(max_length)]
+        column_names = ["interarrival"]
+        date_type = ['numerical']
 
         scores = {}
-        if np.array_equal(real_interarrival_within_flow_list,
-                          synthetic_interarrival_within_flow_list):
-            scores["interarrival"] = 0.0
-        else:
-            scores["interarrival"] = distribution_similarity(
-                real_data=real_interarrival_within_flow_list,
-                synthetic_data=synthetic_interarrival_within_flow_list,
-                column_names=column_names,
-                data_type=date_type,
-                comparison_type='both',
-                categorical_mapping=True
-            )
+        scores["interarrival"] = distribution_similarity(
+            real_data=real_interarrival_within_flow_list,
+            synthetic_data=synthetic_interarrival_within_flow_list,
+            column_names=column_names,
+            data_type=date_type,
+            comparison_type='both',
+            categorical_mapping=True
+        )
         return scores
