@@ -84,6 +84,13 @@ my_report.visualize(real_data, metadata)
 ```
 which will generate a set of plots to visualize the distribution of different fields.
 
+### Implement your own metric
+Follow the steps to implement new metrics:
+1. Create a python file under `sdmetircs/timeseries/[fidelity|privacy]/<metric_name>.py`
+2. Create a python class `<metric_class>` in `<metric_name>.py` that subclasses `TimeSeriesMetric`.
+3. Implement the *class method* `compute(real_data, synthetic_data, metadata)` of the python class `<metric_class>`. You may add more arguments to the `compute` function.
+4. Add new metrics to [quality report](../reports/timeseries/quality_report.py).
+
 ---
 
 Additionally, all the metrics accept a `metadata` argument which must be a dict following
@@ -98,7 +105,7 @@ information required by the metrics will not be populated.
 
 
 # TODOs:
-- [ ] add README on adding new metrics
+- [x] add README on adding new metrics
 - [ ] save/load reports including figures and numbers
 - [ ] single dataset visualization
 - [ ] Convert matplotlib to plotly
