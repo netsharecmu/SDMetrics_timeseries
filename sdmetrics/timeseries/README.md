@@ -107,10 +107,14 @@ information required by the metrics will not be populated.
 # TODOs:
 - [x] add README on adding new metrics
 - [ ] save/load reports including figures and numbers
-- [ ] single dataset visualization
+- [x] single dataset visualization
 - [ ] Convert matplotlib to plotly
 - [ ] Modify metadata def from SDV?
 - [ ] Better plot information
 - [ ] More informative reports
 - [ ] Create plot examples for pcap/netflow/wiki
 - [ ] Write unit tests
+
+# Issues/Bugs
+- [ ] Negative `single attribute coverage` (jacaard similarity)
+- [ ] [`distribution_similarity`](./utils/distribution_similarity.py) is stuck when the traces are large
