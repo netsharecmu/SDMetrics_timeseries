@@ -67,19 +67,21 @@ def coverage(
             if real_data.shape[1] == 1:
                 real_data_flatten, synthetic_data_flatten = \
                     real_data.flatten(), synthetic_data.flatten()
-                output.append(
-                    (min(
-                        max(real_data_flatten),
-                        max(synthetic_data_flatten)) -
-                     max(
-                         min(real_data_flatten),
-                         min(synthetic_data_flatten))) /
-                    (max(
-                        max(real_data_flatten),
-                        max(synthetic_data_flatten)) -
-                     min(
-                         min(real_data_flatten),
-                         min(synthetic_data_flatten))))
+                numerator = (min(
+                    max(real_data_flatten),
+                    max(synthetic_data_flatten)) -
+                    max(
+                    min(real_data_flatten),
+                    min(synthetic_data_flatten)))
+                denominator = (max(
+                    max(real_data_flatten),
+                    max(synthetic_data_flatten)) -
+                    min(
+                    min(real_data_flatten),
+                    min(synthetic_data_flatten)))
+                # Coverage is zero if real and synthetic data does not overlap
+                output.append(numerator / denominator
+                              if numerator >= 0 else 0.0)
             # TODO: efficient implementation
             elif real_data.shape[1] > 1:
                 pass
