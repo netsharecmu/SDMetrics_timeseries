@@ -116,5 +116,5 @@ information required by the metrics will not be populated.
 - [ ] Write unit tests
 
 # Issues/Bugs
-- [ ] Negative `single attribute coverage` (jacaard similarity)
+- [x] Negative `single attribute coverage` (jacaard similarity)
 - [ ] [`distribution_similarity`](./utils/distribution_similarity.py) is stuck when the traces are large
