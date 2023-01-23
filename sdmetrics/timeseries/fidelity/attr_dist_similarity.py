@@ -23,10 +23,6 @@ class AttrDistSimilarity(TimeSeriesMetric):
 
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
-        real_data_attribute, _, _ = \
-            cls._load_attribute_feature(real_data, metadata)
-        synthetic_data_attribute, _, _ = \
-            cls._load_attribute_feature(synthetic_data, metadata)
         attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
         for col in target:
             if col not in attribute_cols:

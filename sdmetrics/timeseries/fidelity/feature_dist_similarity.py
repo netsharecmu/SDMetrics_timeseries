@@ -7,6 +7,10 @@ from sdmetrics.timeseries.utils import distribution_similarity
 
 
 class FeatureDistSimilarity(TimeSeriesMetric):
+    """We compute the marginal distribution of values for a single fixed feature f. For example, for the feature key “latitude”, this would compute a distribution over all the latitudes seen in every time series in the dataset. We compare this distribution between synthetic and real data. 
+
+    Fix a set of features F={f1,...,fm} whose joint distribution you want to compare. (This can be used to evaluate joint distributions or marginal distributions. If you only want to look at marginals (ie one feature at a time) just let F contain a single feature)."""
+
     name = "Feature distributional similarity"
     goal = Goal.MINIMIZE
 
