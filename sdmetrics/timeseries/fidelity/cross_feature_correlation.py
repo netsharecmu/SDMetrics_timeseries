@@ -7,6 +7,8 @@ from sdmetrics.timeseries.utils import pearson_corr
 
 
 class CrossFeatureCorrelation(TimeSeriesMetric):
+    """This metric computes the Pearson correlation between two features f1 and f2. This correlation is computed (averaged) over every record in every time series in the (real or synthetic) dataset. We then compare the difference in these correlation values between the real and synthetic datasets."""
+
     name = "Cross Feature Correlation"
     goal = Goal.MAXIMIZE
 
