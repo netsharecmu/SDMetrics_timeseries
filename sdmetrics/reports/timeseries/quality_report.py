@@ -1,40 +1,30 @@
 """Timeseries quality report"""
+import os
 import sys
 import pickle
 import random
 import warnings
 import pkg_resources
 import dash
+import inspect
+
 
 from dash import dcc, html
 from dash.dependencies import Input, Output
 from tqdm import tqdm
-
-from sdmetrics.timeseries import TimeSeriesMetric
-from sdmetrics.timeseries.fidelity import (
-    SingleAttrDistSimilarity,
-    SingleAttrCoverage,
-    SessionLengthDistSimilarity,
-    FeatureDistSimilarity,
-    CrossFeatureCorrelation,
-    InterarrivalDistSimilarity,
-    PerFeatureAutocorrelation,
-    SingleAttrSingleFeatureCorrelation
-)
-
-METRICS = [
-    SingleAttrDistSimilarity,
-    # SingleAttrCoverage,
-    # SessionLengthDistSimilarity,
-    # FeatureDistSimilarity,
-    # CrossFeatureCorrelation,
-    # InterarrivalDistSimilarity,
-    # PerFeatureAutocorrelation,
-    # SingleAttrSingleFeatureCorrelation
-]
+from config_io import Config
 
 
 class QualityReport():
+    def __init__(self, config_file=None):
+        print(os.path.dirname(inspect.getfile(self.__class__)))
+        self.config = Config.load_from_file(
+            config_file, default="config_quality_report.json",
+            default_search_paths=[os.path.dirname(
+                inspect.getfile(self.__class__))]
+        )
+        print(self.config)
+
     def _print_scores(self, scores, out):
         for col, score in scores.items():
             assert len(score) >= 1, \
@@ -73,46 +63,50 @@ class QualityReport():
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
         self.dict_metric_scores = {}
 
-        for metric in tqdm(METRICS):
-            try:
-                self.dict_metric_scores[metric.name] = metric.compute(
-                    real_data, synthetic_data, metadata)
-            except:
-                attribute_cols = metadata['entity_columns'] + metadata['context_columns']
-                feature_cols = list(set(real_data.columns) -
-                                    set(attribute_cols))
-                if metric == CrossFeatureCorrelation:
-                    self.dict_metric_scores[metric.name] = metric.compute(
-                        real_data, synthetic_data, metadata,
-                        target=random.choices(
-                            [f for f in feature_cols
-                             if metadata['fields'][f]['type']
-                             == 'numerical'],
-                            k=2))
+        # Single attribute distributional similarity
+        self.dict_metric_scores['Single attribute distributional similarity'] = {
+        }
 
-                elif metric == PerFeatureAutocorrelation:
-                    self.dict_metric_scores[metric.name] = metric.compute(
-                        real_data, synthetic_data, metadata,
-                        target=random.choice(
-                            [f for f in feature_cols
-                             if metadata['fields'][f]['type']
-                             == 'numerical']))
+        # for metric in tqdm(METRICS):
+        #     try:
+        #         self.dict_metric_scores[metric.name] = metric.compute(
+        #             real_data, synthetic_data, metadata)
+        #     except:
+        #         attribute_cols = metadata['entity_columns'] + metadata['context_columns']
+        #         feature_cols = list(set(real_data.columns) -
+        #                             set(attribute_cols))
+        #         if metric == CrossFeatureCorrelation:
+        #             self.dict_metric_scores[metric.name] = metric.compute(
+        #                 real_data, synthetic_data, metadata,
+        #                 target=random.choices(
+        #                     [f for f in feature_cols
+        #                      if metadata['fields'][f]['type']
+        #                      == 'numerical'],
+        #                     k=2))
 
-                elif metric == SingleAttrSingleFeatureCorrelation:
-                    self.dict_metric_scores[metric.name] = metric.compute(
-                        real_data, synthetic_data, metadata,
-                        attr_name=random.choice(
-                            [f for f in attribute_cols
-                             if metadata['fields'][f]['type']
-                             == 'categorical']),
-                        feature_name=random.choice(
-                            [f for f in feature_cols
-                             if metadata['fields'][f]['type']
-                             == 'numerical'])
-                    )
+        #         elif metric == PerFeatureAutocorrelation:
+        #             self.dict_metric_scores[metric.name] = metric.compute(
+        #                 real_data, synthetic_data, metadata,
+        #                 target=random.choice(
+        #                     [f for f in feature_cols
+        #                      if metadata['fields'][f]['type']
+        #                      == 'numerical']))
 
-                else:
-                    self.dict_metric_scores[metric.name] = None
+        #         elif metric == SingleAttrSingleFeatureCorrelation:
+        #             self.dict_metric_scores[metric.name] = metric.compute(
+        #                 real_data, synthetic_data, metadata,
+        #                 attr_name=random.choice(
+        #                     [f for f in attribute_cols
+        #                      if metadata['fields'][f]['type']
+        #                      == 'categorical']),
+        #                 feature_name=random.choice(
+        #                     [f for f in feature_cols
+        #                      if metadata['fields'][f]['type']
+        #                      == 'numerical'])
+        #             )
+
+        #         else:
+        #             self.dict_metric_scores[metric.name] = None
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.

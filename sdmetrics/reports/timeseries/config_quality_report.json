@@ -1,0 +1,14 @@
+{
+    "metrics": {
+        "fidelity": {
+            "Single attribute distributional similarity": {
+                "class": "SingleAttrDistSimilarity",
+                "target_list": null
+            },
+            "Multiple attributes distributional similarity": {
+                "class": "SingleAttrDistSimilarity",
+                "target_list": null
+            }
+        }
+    }
+}
