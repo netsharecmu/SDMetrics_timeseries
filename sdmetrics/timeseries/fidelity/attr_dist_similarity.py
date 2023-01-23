@@ -42,33 +42,3 @@ class AttrDistSimilarity(TimeSeriesMetric):
             comparison_type='both',
             categorical_mapping=True
         )
-
-        scores = {}
-        for column_name, real_column in real_data.items():
-            if column_name not in metadata['entity_columns'] + metadata['context_columns']:
-                continue
-            if column_name in metadata['fields']:
-                real_column = real_column.to_numpy().reshape(-1, 1)
-                synthetic_column = synthetic_data[column_name].to_numpy(
-                ).reshape(-1, 1)
-
-                if metadata['fields'][column_name]['type'] in ['categorical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['categorical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-                elif metadata['fields'][column_name]['type'] in ['numerical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['numerical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-
-        return scores
