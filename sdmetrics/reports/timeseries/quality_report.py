@@ -7,6 +7,7 @@ import warnings
 import pkg_resources
 import dash
 import inspect
+import importlib
 
 
 from dash import dcc, html
@@ -17,13 +18,11 @@ from config_io import Config
 
 class QualityReport():
     def __init__(self, config_file=None):
-        print(os.path.dirname(inspect.getfile(self.__class__)))
-        self.config = Config.load_from_file(
+        self._config = Config.load_from_file(
             config_file, default="config_quality_report.json",
             default_search_paths=[os.path.dirname(
                 inspect.getfile(self.__class__))]
         )
-        print(self.config)
 
     def _print_scores(self, scores, out):
         for col, score in scores.items():
@@ -63,9 +62,18 @@ class QualityReport():
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
         self.dict_metric_scores = {}
 
-        # Single attribute distributional similarity
-        self.dict_metric_scores['Single attribute distributional similarity'] = {
-        }
+        for metric_type, metrics in self._config["metrics"].items():
+            # fidelity/privacy
+            metric_module = importlib.import_module(
+                f"sdmetrics.timeseries.{metric_type}")
+            for metric_name, metric_config in metrics.items():
+                print(metric_name)
+                metric_class = getattr(metric_module, metric_config["class"])
+                for target in metric_config["target_list"]:
+                    metric_class.compute(
+                        real_data, synthetic_data, metadata,
+                        target=target
+                    )
 
         # for metric in tqdm(METRICS):
         #     try:

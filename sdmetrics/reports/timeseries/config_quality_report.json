@@ -3,11 +3,11 @@
         "fidelity": {
             "Single attribute distributional similarity": {
                 "class": "SingleAttrDistSimilarity",
-                "target_list": null
+                "target_list": []
             },
             "Multiple attributes distributional similarity": {
                 "class": "SingleAttrDistSimilarity",
-                "target_list": null
+                "target_list": []
             }
         }
     }

@@ -15,8 +15,9 @@ class SingleAttrDistSimilarity(TimeSeriesMetric):
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
                 entity_columns=None, target=None):
-        assert isinstance(target, List[str]), \
-            "target has to be a list of strings where each string specifies an attribute column."
+        if not all(isinstance(s, str) for s in target):
+            raise ValueError(
+                "target has to be a list of strings where each string specifies an attribute column.")
 
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
