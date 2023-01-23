@@ -47,6 +47,14 @@ class TimeSeriesMetric(BaseMetric):
         }
     }
 
+    def _get_attribute_feature_cols(self, metadata):
+        attribute_cols = metadata['entity_columns'] + \
+            metadata['context_columns']
+        feature_cols = list(
+            set(list(metadata['fields'].keys())) - set(attribute_cols))
+
+        return attribute_cols, feature_cols
+
     @classmethod
     def _load_attribute_feature(cls, data, metadata=None, entity_columns=None):
         '''Construct `data_attribute` and `data_feature`'''

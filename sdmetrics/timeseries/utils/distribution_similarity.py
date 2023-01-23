@@ -55,7 +55,8 @@ def distribution_similarity(
         # categorical/numerical mixed: discretizing numerical variables
         # TODO: think of alternative strategy
         elif set(data_type) == {'categorical', 'numerical'}:
-            pass
+            raise warnings.warn(
+                "Multiple varibles with categorical and numerical values mixed! Currently not supported for quantitative comprasion.")
         else:
             raise ValueError(
                 "Unsupported data type, only `categorical` and `numerical` are supported.")
