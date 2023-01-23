@@ -22,19 +22,18 @@ class CrossFeatureCorrelation(TimeSeriesMetric):
             raise ValueError(
                 "target has to be a list of strings where each string specifies an attribute column.")
         assert len(target) == 2, \
-            "expected is expected to be a list including two elements representing two columns."
+            "`target` is expected to be a list including two elements representing two columns."
 
         column_1 = target[0]
         column_2 = target[1]
-        assert column_1 in metadata['fields'], \
-            f"column {column_1} should exist in the dataframe"
-        assert column_2 in metadata['fields'], \
-            f"column {column_2} should exist in the dataframe"
         assert metadata['fields'][column_1]['type'] in ['numerical'], \
             f"column {column_1} should be numerical"
         assert metadata['fields'][column_2]['type'] in ['numerical'], \
             f"column {column_2} should be numerical"
-        scores = {}
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
+        for col in target:
+            if col not in feature_cols:
+                raise ValueError(f"Column {col} is not a feature.")
 
         real_corr = pearson_corr(real_data[column_1].to_numpy(
         ), real_data[column_2].to_numpy())
