@@ -85,7 +85,7 @@ class QualityReport():
                         OrderedDict()
                     for target in metric_config["target_list"]:
                         self.dict_metric_scores[metric_type][metric_name][
-                            tuple(target)] = metric_class.compute(
+                            str(target)] = metric_class.compute(
                             real_data, synthetic_data, metadata, target=target)
 
         pprint.pprint(self.dict_metric_scores)

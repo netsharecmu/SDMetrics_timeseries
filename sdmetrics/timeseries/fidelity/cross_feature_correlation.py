@@ -18,9 +18,9 @@ class CrossFeatureCorrelation(TimeSeriesMetric):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 
-        assert isinstance(target, list), \
-            "target should be a list type"
-
+        if not all(isinstance(s, str) for s in target):
+            raise ValueError(
+                "target has to be a list of strings where each string specifies an attribute column.")
         assert len(target) == 2, \
             "expected is expected to be a list including two elements representing two columns."
 
@@ -42,5 +42,4 @@ class CrossFeatureCorrelation(TimeSeriesMetric):
             synthetic_data[column_1].to_numpy(),
             synthetic_data[column_2].to_numpy())
 
-        scores[str(target)] = [1 - (abs(real_corr - synthetic_corr)) / 2]
-        return scores
+        return [1 - (abs(real_corr - synthetic_corr)) / 2]
