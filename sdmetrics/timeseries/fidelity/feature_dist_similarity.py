@@ -43,7 +43,8 @@ class FeatureDistSimilarity(TimeSeriesMetric):
             real_data=real_columns,
             synthetic_data=synthetic_columns,
             column_names=target,
-            data_type=[metadata['fields'][col]['type'] for col in target],
+            data_type=['numerical'
+                       if metadata['fields'][col]['type'] == 'datetime' else
+                       metadata['fields'][col]['type'] for col in target],
             comparison_type='both',
-            categorical_mapping=True
-        )
+            categorical_mapping=True)
