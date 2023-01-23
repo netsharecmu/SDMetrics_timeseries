@@ -2,11 +2,11 @@
     "metrics": {
         "fidelity": {
             "Single attribute distributional similarity": {
-                "class": "SingleAttrDistSimilarity",
+                "class": "AttrDistSimilarity",
                 "target_list": []
             },
             "Multiple attributes distributional similarity": {
-                "class": "SingleAttrDistSimilarity",
+                "class": "AttrDistSimilarity",
                 "target_list": []
             }
         }

@@ -8,8 +8,8 @@ from sdmetrics.timeseries.base import TimeSeriesMetric
 from sdmetrics.timeseries.utils import distribution_similarity
 
 
-class SingleAttrDistSimilarity(TimeSeriesMetric):
-    name = "Single attribute distributional similarity"
+class AttrDistSimilarity(TimeSeriesMetric):
+    name = "Attribute distributional similarity"
     goal = Goal.MINIMIZE
 
     @classmethod
