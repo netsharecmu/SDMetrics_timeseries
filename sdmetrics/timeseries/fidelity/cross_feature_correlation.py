@@ -27,13 +27,13 @@ class CrossFeatureCorrelation(TimeSeriesMetric):
         column_1 = target[0]
         column_2 = target[1]
         assert column_1 in metadata['fields'], \
-            "column should exist in the dataframe"
+            f"column {column_1} should exist in the dataframe"
         assert column_2 in metadata['fields'], \
-            "column should exist in the dataframe"
+            f"column {column_2} should exist in the dataframe"
         assert metadata['fields'][column_1]['type'] in ['numerical'], \
-            "column data should be numerical"
+            f"column {column_1} should be numerical"
         assert metadata['fields'][column_2]['type'] in ['numerical'], \
-            "column data should be numerical"
+            f"column {column_2} should be numerical"
         scores = {}
 
         real_corr = pearson_corr(real_data[column_1].to_numpy(
