@@ -9,6 +9,8 @@ from sdmetrics.timeseries.utils import distribution_similarity
 
 
 class AttrDistSimilarity(TimeSeriesMetric):
+    """This compares the distribution of a single or multiple metadata attributes (e.g., device type) between the real and synthetic data. It computes a distance between the two distributions."""
+
     name = "Attribute distributional similarity"
     goal = Goal.MINIMIZE
 
