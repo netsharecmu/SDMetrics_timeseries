@@ -1,14 +1,29 @@
 {
     "metrics": {
-        "fidelity": {
-            "Single attribute distributional similarity": {
-                "class": "AttrDistSimilarity",
-                "target_list": []
+        "fidelity": [
+            {
+                "Single attribute distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": []
+                }
             },
-            "Multiple attributes distributional similarity": {
-                "class": "AttrDistSimilarity",
-                "target_list": []
+            {
+                "Single attribute coverage": {
+                    "class": "SingleAttrCoverage",
+                    "target_list": []
+                }
+            },
+            {
+                "Multiple attributes distributional similarity": {
+                    "class": "AttrDistSimilarity",
+                    "target_list": []
+                }
+            },
+            {
+                "Session length distributional similarity": {
+                    "class": "SessionLengthDistSimilarity"
+                }
             }
-        }
+        ]
     }
 }

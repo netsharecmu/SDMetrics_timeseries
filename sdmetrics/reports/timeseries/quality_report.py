@@ -15,6 +15,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 from tqdm import tqdm
 from config_io import Config
+from collections import OrderedDict
 
 
 class QualityReport():
@@ -61,21 +62,31 @@ class QualityReport():
         app.run_server(debug=True)
 
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
-        self.dict_metric_scores = {}
+        self.dict_metric_scores = OrderedDict()
 
         for metric_type, metrics in self._config["metrics"].items():
             # fidelity/privacy
             metric_module = importlib.import_module(
                 f"sdmetrics.timeseries.{metric_type}")
-            self.dict_metric_scores[metric_type] = {}
-            for metric_name, metric_config in metrics.items():
-                print(metric_name)
-                self.dict_metric_scores[metric_type][metric_name] = {}
+            self.dict_metric_scores[metric_type] = OrderedDict()
+            for metric_dict in metrics:
+                metric_name = list(metric_dict.keys())[0]
+                metric_config = list(metric_dict.values())[0]
                 metric_class = getattr(metric_module, metric_config["class"])
-                for target in metric_config["target_list"]:
-                    self.dict_metric_scores[metric_type][metric_name][
-                        tuple(target)] = metric_class.compute(
-                        real_data, synthetic_data, metadata, target=target)
+
+                # Metrics that do not have `target` (e.g., session length)
+                if "target_list" not in metric_config:
+                    self.dict_metric_scores[metric_type][metric_name] = metric_class.compute(
+                        real_data, synthetic_data, metadata)
+
+                # Metrics that have `target` (e.g., single attribute distributional similarity)
+                else:
+                    self.dict_metric_scores[metric_type][metric_name] = \
+                        OrderedDict()
+                    for target in metric_config["target_list"]:
+                        self.dict_metric_scores[metric_type][metric_name][
+                            tuple(target)] = metric_class.compute(
+                            real_data, synthetic_data, metadata, target=target)
 
         pprint.pprint(self.dict_metric_scores)
 
