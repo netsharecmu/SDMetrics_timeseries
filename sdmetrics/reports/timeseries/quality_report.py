@@ -8,6 +8,7 @@ import pkg_resources
 import dash
 import inspect
 import importlib
+import pprint
 
 
 from dash import dcc, html
@@ -66,14 +67,17 @@ class QualityReport():
             # fidelity/privacy
             metric_module = importlib.import_module(
                 f"sdmetrics.timeseries.{metric_type}")
+            self.dict_metric_scores[metric_type] = {}
             for metric_name, metric_config in metrics.items():
                 print(metric_name)
+                self.dict_metric_scores[metric_type][metric_name] = {}
                 metric_class = getattr(metric_module, metric_config["class"])
                 for target in metric_config["target_list"]:
-                    metric_class.compute(
-                        real_data, synthetic_data, metadata,
-                        target=target
-                    )
+                    self.dict_metric_scores[metric_type][metric_name][
+                        tuple(target)] = metric_class.compute(
+                        real_data, synthetic_data, metadata, target=target)
+
+        pprint.pprint(self.dict_metric_scores)
 
         # for metric in tqdm(METRICS):
         #     try:
