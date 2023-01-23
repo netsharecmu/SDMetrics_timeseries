@@ -17,54 +17,33 @@ class FeatureDistSimilarity(TimeSeriesMetric):
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
                 entity_columns=None, target=None):
+        if not all(isinstance(s, str) for s in target):
+            raise ValueError(
+                "target has to be a list of strings where each string specifies a feature column.")
+
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
-        attribute_cols = metadata['entity_columns'] + \
-            metadata['context_columns']
-        feature_cols = list(set(real_data.columns) - set(attribute_cols))
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
+        for col in target:
+            if col not in feature_cols:
+                raise ValueError(f"Column {col} is not a feature.")
 
-        scores = {}
-        # From doc, datetime is also a feature and should be added to calculate the
-        # distributional similarity. I cast the timestamp into unix integer
-        # with unit (s)
-        # TODO: multi-feature distribution
-        for column_name in feature_cols:
-            if column_name == metadata["sequence_index"]:
-                real_data[column_name] = pd.to_datetime(
-                    real_data[column_name]).astype(int) / 10**9
-                synthetic_data[column_name] = pd.to_datetime(
-                    synthetic_data[column_name]).astype(int) / 10**9
-            real_column = real_data[column_name].to_numpy().reshape(-1, 1)
-            synthetic_column = synthetic_data[column_name].to_numpy(
-            ).reshape(-1, 1)
+            # Convert datetime to unix timestamp (unit: second) in-place
+            if metadata['fields'][col]['type'] == 'datetime':
+                real_data[col] = pd.to_datetime(
+                    real_data[col]).astype(int) / 10**9
+                synthetic_data[col] = pd.to_datetime(
+                    synthetic_data[col]).astype(int) / 10**9
 
-            if column_name in metadata['fields']:
-                if metadata['fields'][column_name]['type'] in ['categorical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['categorical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-                elif metadata['fields'][column_name]['type'] in ['numerical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['numerical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-                elif column_name == metadata["sequence_index"]:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['numerical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
+        real_columns = real_data[target].to_numpy().reshape(-1, len(target))
+        synthetic_columns = synthetic_data[target].to_numpy(
+        ).reshape(-1, len(target))
 
-        return scores
+        return distribution_similarity(
+            real_data=real_columns,
+            synthetic_data=synthetic_columns,
+            column_names=target,
+            data_type=[metadata['fields'][col]['type'] for col in target],
+            comparison_type='both',
+            categorical_mapping=True
+        )
