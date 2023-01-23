@@ -4,7 +4,10 @@ import pickle
 import random
 import warnings
 import pkg_resources
+import dash
 
+from dash import dcc, html
+from dash.dependencies import Input, Output
 from tqdm import tqdm
 
 from sdmetrics.timeseries import TimeSeriesMetric
@@ -21,13 +24,13 @@ from sdmetrics.timeseries.fidelity import (
 
 METRICS = [
     SingleAttrDistSimilarity,
-    SingleAttrCoverage,
-    SessionLengthDistSimilarity,
-    FeatureDistSimilarity,
-    CrossFeatureCorrelation,
-    InterarrivalDistSimilarity,
-    PerFeatureAutocorrelation,
-    SingleAttrSingleFeatureCorrelation
+    # SingleAttrCoverage,
+    # SessionLengthDistSimilarity,
+    # FeatureDistSimilarity,
+    # CrossFeatureCorrelation,
+    # InterarrivalDistSimilarity,
+    # PerFeatureAutocorrelation,
+    # SingleAttrSingleFeatureCorrelation
 ]
 
 
@@ -43,52 +46,73 @@ class QualityReport():
             if len(score) == 2:
                 score[1].show()
 
+    def visualize(self):
+        app = dash.Dash(__name__)
+        html_children = []
+        for metric, scores in self.dict_metric_scores.items():
+            html_children.append(html.Div(
+                html.H1(children=metric)))
+            for submetric, score_and_plot in scores.items():
+                score = score_and_plot[0]
+                if len(score_and_plot) > 1:
+                    fig = score_and_plot[1]
+                    html_children.append(
+                        html.Div([
+                            html.Div(children=submetric),
+
+                            dcc.Graph(
+                                id=f'graph-{metric}-{submetric}',
+                                figure=fig,
+                                style={'width': '100vh'}
+                            )
+                        ])
+                    )
+        app.layout = html.Div(children=html_children)
+        app.run_server(debug=True)
+
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
-        for metric in METRICS:
-            out.write("="*80+"\n")
-            out.write(f"Metric: {metric.name}\n")
+        self.dict_metric_scores = {}
+
+        for metric in tqdm(METRICS):
             try:
-                self._print_scores(metric.compute(
-                    real_data, synthetic_data, metadata), out)
+                self.dict_metric_scores[metric.name] = metric.compute(
+                    real_data, synthetic_data, metadata)
             except:
                 attribute_cols = metadata['entity_columns'] + metadata['context_columns']
                 feature_cols = list(set(real_data.columns) -
                                     set(attribute_cols))
                 if metric == CrossFeatureCorrelation:
-                    self._print_scores(
-                        metric.compute(
-                            real_data, synthetic_data, metadata,
-                            target=random.choices(
-                                [f for f in feature_cols
-                                 if metadata['fields'][f]['type']
-                                 == 'numerical'],
-                                k=2)), out)
+                    self.dict_metric_scores[metric.name] = metric.compute(
+                        real_data, synthetic_data, metadata,
+                        target=random.choices(
+                            [f for f in feature_cols
+                             if metadata['fields'][f]['type']
+                             == 'numerical'],
+                            k=2))
 
                 elif metric == PerFeatureAutocorrelation:
-                    self._print_scores(
-                        metric.compute(
-                            real_data, synthetic_data, metadata,
-                            target=random.choice(
-                                [f for f in feature_cols
-                                 if metadata['fields'][f]['type']
-                                 == 'numerical'])), out)
+                    self.dict_metric_scores[metric.name] = metric.compute(
+                        real_data, synthetic_data, metadata,
+                        target=random.choice(
+                            [f for f in feature_cols
+                             if metadata['fields'][f]['type']
+                             == 'numerical']))
 
                 elif metric == SingleAttrSingleFeatureCorrelation:
-                    self._print_scores(
-                        metric.compute(real_data, synthetic_data, metadata,
-                                       attr_name=random.choice(
-                                           [f for f in attribute_cols
-                                            if metadata['fields'][f]['type']
-                                               == 'categorical']),
-                                       feature_name=random.choice(
-                                           [f for f in feature_cols
-                                            if metadata['fields'][f]['type']
-                                            == 'numerical'])
-                                       ), out)
+                    self.dict_metric_scores[metric.name] = metric.compute(
+                        real_data, synthetic_data, metadata,
+                        attr_name=random.choice(
+                            [f for f in attribute_cols
+                             if metadata['fields'][f]['type']
+                             == 'categorical']),
+                        feature_name=random.choice(
+                            [f for f in feature_cols
+                             if metadata['fields'][f]['type']
+                             == 'numerical'])
+                    )
 
                 else:
-                    out.write("Metric is not compatible with this dataset.\n")
-            out.write("="*80+"\n\n")
+                    self.dict_metric_scores[metric.name] = None
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
