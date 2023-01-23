@@ -15,8 +15,8 @@ class SingleAttrDistSimilarity(TimeSeriesMetric):
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
                 entity_columns=None, target=None):
-        assert isinstance(target, str) or isinstance(target, List[str]), \
-            "target has to be either `str` for a single column or a list of strings for multiple columns."
+        assert isinstance(target, List[str]), \
+            "target has to be a list of strings where each string specifies an attribute column."
 
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
@@ -24,6 +24,24 @@ class SingleAttrDistSimilarity(TimeSeriesMetric):
             cls._load_attribute_feature(real_data, metadata)
         synthetic_data_attribute, _, _ = \
             cls._load_attribute_feature(synthetic_data, metadata)
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
+        for col in target:
+            if col not in attribute_cols:
+                raise ValueError(f"Column {col} is not an attribute.")
+
+        real_columns = real_data[target].to_numpy().reshape(-1, len(target))
+        synthetic_columns = synthetic_data[target].to_numpy(
+        ).reshape(-1, len(target))
+
+        return distribution_similarity(
+            real_data=real_columns,
+            synthetic_data=synthetic_columns,
+            column_names=target,
+            data_type=[metadata['fields'][col]['type'] for col in target],
+            comparison_type='both',
+            categorical_mapping=True
+        )
+
         scores = {}
         for column_name, real_column in real_data.items():
             if column_name not in metadata['entity_columns'] + metadata['context_columns']:

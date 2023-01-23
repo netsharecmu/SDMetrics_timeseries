@@ -55,7 +55,7 @@ class TimeSeriesMetric(BaseMetric):
 
         return attribute_cols, feature_cols
 
-    @classmethod
+    @ classmethod
     def _load_attribute_feature(cls, data, metadata=None, entity_columns=None):
         '''Construct `data_attribute` and `data_feature`'''
         attribute_cols = metadata['entity_columns'] + metadata['context_columns']
@@ -86,7 +86,7 @@ class TimeSeriesMetric(BaseMetric):
 
         return data_attribute, data_feature, data_gen_flag
 
-    @classmethod
+    @ classmethod
     def _validate_inputs(
             cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         if set(real_data.columns) != set(synthetic_data.columns):
@@ -115,7 +115,7 @@ class TimeSeriesMetric(BaseMetric):
 
         return metadata, entity_columns
 
-    @classmethod
+    @ classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
                 entity_columns=None):
         """Compute this metric.
