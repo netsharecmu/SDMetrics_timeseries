@@ -85,7 +85,7 @@ def make_venn2_plot(
 
     plt.title(f"Coverage of real vs. synthetic Data for column {column_name}")
 
-    return plt
+    return plotly.tools.mpl_to_plotly(fig)
 
 
 def make_overlap_range_1d_plot(real_data, synthetic_data, column_name: str):
@@ -99,7 +99,7 @@ def make_overlap_range_1d_plot(real_data, synthetic_data, column_name: str):
     plt.gca().get_yaxis().set_visible(False)
     plt.title(f"Coverage of real vs. synthetic Data for column {column_name}")
 
-    return plt
+    return plotly.tools.mpl_to_plotly(fig)
 
 
 def make_discrete_column_plot_single(real_column, sdtype):

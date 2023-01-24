@@ -25,6 +25,7 @@ class QualityReport():
             default_search_paths=[os.path.dirname(
                 inspect.getfile(self.__class__))]
         )
+        self.graph_idx = 0
 
     def _print_scores(self, scores, out):
         for col, score in scores.items():
@@ -64,7 +65,6 @@ class QualityReport():
     # Different metrics have different depths
     # E.g., `single_attr_dist` has depth=2, `interarrival` has depth=1
     def _traverse_metrics_dict(self, metrics_dict, html_children):
-        idx = 0
         for main_metric, scores in metrics_dict.items():
             html_children.append(html.Div(main_metric))
             if isinstance(scores, list):  # TODO: check recursive stop
@@ -75,12 +75,13 @@ class QualityReport():
                         html.Div(f"score={score}"),
                         html.Div([
                             dcc.Graph(
-                                id=f'graph-{idx}',
+                                id=f'graph-{self.graph_idx}',
                                 figure=fig,
                                 style={'width': '100vh'}
                             )
                         ])
                     ]))
+                    self.graph_idx += 1
                 else:
                     html_children.append(
                         html.Div(f"score={score}")
