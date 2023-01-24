@@ -7,6 +7,8 @@ from sdmetrics.timeseries.utils import distribution_similarity
 
 
 class InterarrivalDistSimilarity(TimeSeriesMetric):
+    """Checks the inter-arrival time distribution between records (compared to same distribution in real data)"""
+
     name = "Interarrival distributional similarity"
     goal = Goal.MINIMIZE
 
@@ -15,49 +17,38 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
                 entity_columns=None):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
-        attribute_cols = metadata['entity_columns'] + \
-            metadata['context_columns']
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
 
+        # By SDV, metadata["sequence_index"] is the column name used to order the rows in the table
         column_sequence_index = metadata["sequence_index"]
-        real_data[column_sequence_index] = pd.to_datetime(
-            real_data[column_sequence_index]).astype(int) / 10**9
-        synthetic_data[column_sequence_index] = pd.to_datetime(
-            synthetic_data[column_sequence_index]).astype(int) / 10**9
+        # Convert datetime to unix timestamp (unit: second) in-place
+        if metadata['fields'][column_sequence_index]['type'] == 'datetime':
+            real_data[column_sequence_index] = pd.to_datetime(
+                real_data[column_sequence_index]).astype(int) / 10**9
+            synthetic_data[column_sequence_index] = pd.to_datetime(
+                synthetic_data[column_sequence_index]).astype(int) / 10**9
 
         real_gk = real_data.groupby(attribute_cols)
         real_interarrival_within_flow_list = []
-
         synthetic_gk = synthetic_data.groupby(attribute_cols)
         synthetic_interarrival_within_flow_list = []
 
-        max_length = max(max(real_gk.size()), max(synthetic_gk.size()))
-
         for group_name, df_group in real_gk:
-            real_interarrival_within_flow_list.append([0.0] +
-                                                      list(np.diff(df_group[column_sequence_index])) +
-                                                      [0.0] * (max_length - len(df_group)))
-
+            real_interarrival_within_flow_list.append(
+                list(np.diff(df_group[column_sequence_index])))
         real_interarrival_within_flow_list = np.asarray(
             real_interarrival_within_flow_list).reshape(-1, 1)
-
         for group_name, df_group in synthetic_gk:
-            synthetic_interarrival_within_flow_list.append([0.0] +
-                                                           list(np.diff(df_group[column_sequence_index])) +
-                                                           [0.0] * (max_length - len(df_group)))
-
+            synthetic_interarrival_within_flow_list.append(
+                list(np.diff(df_group[column_sequence_index])))
         synthetic_interarrival_within_flow_list = np.asarray(
             synthetic_interarrival_within_flow_list).reshape(-1, 1)
 
-        column_names = ["interarrival"]
-        date_type = ['numerical']
-
-        scores = {}
-        scores["interarrival"] = distribution_similarity(
+        return distribution_similarity(
             real_data=real_interarrival_within_flow_list,
             synthetic_data=synthetic_interarrival_within_flow_list,
-            column_names=column_names,
-            data_type=date_type,
+            column_names=["interarrival"],
+            data_type=['numerical'],
             comparison_type='both',
             categorical_mapping=True
         )
-        return scores
