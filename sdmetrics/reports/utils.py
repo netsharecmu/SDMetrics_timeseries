@@ -5,6 +5,7 @@ import itertools
 
 import numpy as np
 import pandas as pd
+import plotly
 import plotly.express as px
 import plotly.figure_factory as ff
 import matplotlib.pyplot as plt

@@ -37,27 +37,66 @@ class QualityReport():
             if len(score) == 2:
                 score[1].show()
 
-    def visualize(self):
-        app = dash.Dash(__name__)
-        html_children = []
-        for metric, scores in self.dict_metric_scores.items():
-            html_children.append(html.Div(
-                html.H1(children=metric)))
-            for submetric, score_and_plot in scores.items():
-                score = score_and_plot[0]
-                if len(score_and_plot) > 1:
-                    fig = score_and_plot[1]
-                    html_children.append(
-                        html.Div([
-                            html.Div(children=submetric),
+    # def visualize(self):
+    #     app = dash.Dash(__name__)
+    #     html_children = []
+    #     for metric, scores in self.dict_metric_scores.items():
+    #         html_children.append(html.Div(
+    #             html.H1(children=metric)))
+    #         for submetric, score_and_plot in scores.items():
+    #             score = score_and_plot[0]
+    #             if len(score_and_plot) > 1:
+    #                 fig = score_and_plot[1]
+    #                 html_children.append(
+    #                     html.Div([
+    #                         html.Div(children=submetric),
 
+    #                         dcc.Graph(
+    #                             id=f'graph-{metric}-{submetric}',
+    #                             figure=fig,
+    #                             style={'width': '100vh'}
+    #                         )
+    #                     ])
+    #                 )
+    #     app.layout = html.Div(children=html_children)
+    #     app.run_server(debug=True)
+
+    # Different metrics have different depths
+    # E.g., `single_attr_dist` has depth=2, `interarrival` has depth=1
+    def _traverse_metrics_dict(self, metrics_dict, html_children):
+        idx = 0
+        for main_metric, scores in metrics_dict.items():
+            html_children.append(html.Div(main_metric))
+            if isinstance(scores, list):  # TODO: check recursive stop
+                score = scores[0]
+                if len(scores) > 1:
+                    fig = scores[1]
+                    html_children.append(html.Div([
+                        html.Div(f"score={score}"),
+                        html.Div([
                             dcc.Graph(
-                                id=f'graph-{metric}-{submetric}',
+                                id=f'graph-{idx}',
                                 figure=fig,
                                 style={'width': '100vh'}
                             )
                         ])
+                    ]))
+                else:
+                    html_children.append(
+                        html.Div(f"score={score}")
                     )
+            else:
+                self._traverse_metrics_dict(scores, html_children)
+
+    def visualize(self):
+        app = dash.Dash(__name__)
+        html_children = []
+        for metric_type, metrics_dict in self.dict_metric_scores.items():
+            self._traverse_metrics_dict(
+                metrics_dict, html_children)
+
+        print(html_children)
+
         app.layout = html.Div(children=html_children)
         app.run_server(debug=True)
 
@@ -88,48 +127,8 @@ class QualityReport():
                             str(target)] = metric_class.compute(
                             real_data, synthetic_data, metadata, target=target)
 
-        pprint.pprint(self.dict_metric_scores)
-
-        # for metric in tqdm(METRICS):
-        #     try:
-        #         self.dict_metric_scores[metric.name] = metric.compute(
-        #             real_data, synthetic_data, metadata)
-        #     except:
-        #         attribute_cols = metadata['entity_columns'] + metadata['context_columns']
-        #         feature_cols = list(set(real_data.columns) -
-        #                             set(attribute_cols))
-        #         if metric == CrossFeatureCorrelation:
-        #             self.dict_metric_scores[metric.name] = metric.compute(
-        #                 real_data, synthetic_data, metadata,
-        #                 target=random.choices(
-        #                     [f for f in feature_cols
-        #                      if metadata['fields'][f]['type']
-        #                      == 'numerical'],
-        #                     k=2))
-
-        #         elif metric == PerFeatureAutocorrelation:
-        #             self.dict_metric_scores[metric.name] = metric.compute(
-        #                 real_data, synthetic_data, metadata,
-        #                 target=random.choice(
-        #                     [f for f in feature_cols
-        #                      if metadata['fields'][f]['type']
-        #                      == 'numerical']))
-
-        #         elif metric == SingleAttrSingleFeatureCorrelation:
-        #             self.dict_metric_scores[metric.name] = metric.compute(
-        #                 real_data, synthetic_data, metadata,
-        #                 attr_name=random.choice(
-        #                     [f for f in attribute_cols
-        #                      if metadata['fields'][f]['type']
-        #                      == 'categorical']),
-        #                 feature_name=random.choice(
-        #                     [f for f in feature_cols
-        #                      if metadata['fields'][f]['type']
-        #                      == 'numerical'])
-        #             )
-
-        #         else:
-        #             self.dict_metric_scores[metric.name] = None
+        # pprint.pprint(self.dict_metric_scores)
+        # print(self._traverse_metrics_dict(self.dict_metric_scores))
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
