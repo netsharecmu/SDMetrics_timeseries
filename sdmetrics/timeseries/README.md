@@ -35,7 +35,7 @@ TimeSeriesMetric.get_subclasses()
 
 ## Usage
 ### Report (a set of metrics)
-Get started with **SDMetrics Reports** using some demo data,
+Get started with **SDMetrics Reports** using `sunglasses` demo data,
 
 ```Python
 from sdmetrics.demos import load_timeseries_demo
@@ -43,10 +43,29 @@ from sdmetrics.reports.timeseries import QualityReport
 
 real_data, synthetic_data, metadata = load_timeseries_demo()
 
-my_report = QualityReport()
+my_report = QualityReport(config_file="sunglasses_qr.json")
 my_report.generate(real_data, synthetic_data, metadata)
+my_report.visualize()
 ```
-which will generate a report containing numerical values and visual plots.
+which will generate a web report containing numerical values and visual plots.
+
+The [default config file](../reports/timeseries/config_quality_report.json) should be override by user's [customized config file](../reports/timeseries/sunglasses_qr.json) when in use. For each metric, e.g., `SingleAttrSimilarity`, the configuration has to specifiy
+
+- `class`: the Python class that implemented this metric
+- `target_list`: (Optional) specifies the `target column` that the metric would like to be evaluated on.
+```Json
+"Single attribute distributional similarity": {
+    "class": "AttrDistSimilarity",
+    "target_list": [
+        [
+            "store_id"
+        ],
+        [
+            "region"
+        ]
+    ]
+}
+```
 
 ### Single metric
 **Want more metrics?** You can also manually apply any of the metrics in this library to your data. All the timeseries metrics operate on *at least* three inputs:
@@ -89,7 +108,7 @@ Follow the steps to implement new metrics:
 1. Create a python file under `sdmetircs/timeseries/[fidelity|privacy]/<metric_name>.py`
 2. Create a python class `<metric_class>` in `<metric_name>.py` that subclasses `TimeSeriesMetric`.
 3. Implement the *class method* `compute(real_data, synthetic_data, metadata)` of the python class `<metric_class>`. You may add more arguments to the `compute` function.
-4. Add new metrics to [quality report](../reports/timeseries/quality_report.py).
+4. Add new metrics to [quality report configuration file](../reports/timeseries/config_quality_report.json).
 
 ---
 
@@ -106,13 +125,13 @@ information required by the metrics will not be populated.
 
 # TODOs:
 - [x] add README on adding new metrics
-- [ ] Merge multiple plots into one tab
+- [x] Merge multiple plots into one tab
 - [ ] save/load reports including figures and numbers
 - [x] single dataset visualization
 - [ ] Convert matplotlib to plotly
 - [ ] Modify metadata def from SDV?
 - [ ] Better plot information
-- [ ] More informative reports
+- [x] More informative reports
 - [ ] Create plot examples for pcap/netflow/wiki
 - [ ] Write unit tests
 
