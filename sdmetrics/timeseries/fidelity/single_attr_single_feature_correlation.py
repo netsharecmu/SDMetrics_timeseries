@@ -16,11 +16,18 @@ class SingleAttrSingleFeatureCorrelation(TimeSeriesMetric):
     def compute(
             cls, real_data, synthetic_data,
             metadata=None, entity_columns=None,
-            attr_name=None, feature_name=None):
+            target=None):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
-        attribute_cols = metadata['entity_columns'] + metadata['context_columns']
-        feature_cols = list(set(real_data.columns) - set(attribute_cols))
+
+        if not all(isinstance(s, str) for s in target):
+            raise ValueError(
+                "target has to be a list of strings where each string specifies an attribute column.")
+        assert len(target) == 2, \
+            "`target` is expected to be a list including two elements representing one attribute column and one feature column."
+
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
+        attr_name, feature_name = target[0], target[1]
 
         assert attr_name in attribute_cols, \
             f"{attr_name} is not an attribute column."
