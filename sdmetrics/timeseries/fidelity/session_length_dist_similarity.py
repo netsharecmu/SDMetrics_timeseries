@@ -28,11 +28,11 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
         synthetic_column = synthetic_sess_length[column_name].to_numpy(
         ).reshape(-1, 1)
 
-        return cls._insert_best_worst_score_metrics_output(distribution_similarity(
+        return distribution_similarity(
             real_data=real_column,
             synthetic_data=synthetic_column,
             column_names=[column_name],
             data_type=['numerical'],
             comparison_type='both',
             categorical_mapping=True
-        ))
+        )

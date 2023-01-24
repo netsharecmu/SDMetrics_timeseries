@@ -82,11 +82,12 @@ class QualityReport():
                 metric_name = list(metric_dict.keys())[0]
                 metric_config = list(metric_dict.values())[0]
                 metric_class = getattr(metric_module, metric_config["class"])
+                metric_class_instance = metric_class()
 
                 # Metrics that do not have `target` (e.g., session length)
                 if "target_list" not in metric_config:
-                    self.dict_metric_scores[metric_type][metric_name] = metric_class.compute(
-                        real_data, synthetic_data, metadata)
+                    self.dict_metric_scores[metric_type][metric_name] = metric_class_instance._insert_best_worst_score_metrics_output(
+                        metric_class_instance.compute(real_data, synthetic_data, metadata))
 
                 # Metrics that have `target` (e.g., single attribute distributional similarity)
                 else:
@@ -94,8 +95,8 @@ class QualityReport():
                         OrderedDict()
                     for target in metric_config["target_list"]:
                         self.dict_metric_scores[metric_type][metric_name][
-                            str(target)] = metric_class.compute(
-                            real_data, synthetic_data, metadata, target=target)
+                            str(target)] = metric_class_instance._insert_best_worst_score_metrics_output(
+                            metric_class_instance.compute(real_data, synthetic_data, metadata, target=target))
 
             pprint.pprint(self.dict_metric_scores)
 

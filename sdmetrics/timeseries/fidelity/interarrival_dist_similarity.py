@@ -11,6 +11,8 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
 
     name = "Interarrival distributional similarity"
     goal = Goal.MINIMIZE
+    min_value = 0.0
+    max_value = float("inf")
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,

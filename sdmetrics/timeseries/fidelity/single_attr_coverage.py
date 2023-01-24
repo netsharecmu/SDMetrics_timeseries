@@ -36,10 +36,10 @@ class SingleAttrCoverage(TimeSeriesMetric):
         synthetic_columns = synthetic_data[target].to_numpy(
         ).reshape(-1, len(target))
 
-        return cls._insert_best_worst_score_metrics_output(coverage(
+        return coverage(
             real_data=real_columns,
             synthetic_data=synthetic_columns,
             column_names=target,
             data_type=[metadata['fields'][col]['type'] for col in target],
             comparison_type='both'
-        ))
+        )
