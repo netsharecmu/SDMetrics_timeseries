@@ -4,6 +4,7 @@ from operator import attrgetter
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.goal import Goal
 
 import numpy as np
 
@@ -48,6 +49,35 @@ class TimeSeriesMetric(BaseMetric):
     }
 
     @classmethod
+    def _insert_best_worst_score_metrics_output(cls, metrics_output):
+        if cls.goal == Goal.MINIMIZE:
+            cls.best_score = cls.min_value
+            cls.worst_score = cls.max_value
+        elif cls.goal == Goal.MAXIMIZE:
+            cls.best_score = cls.max_value
+            cls.worst_score = cls.min_value
+        else:
+            raise ValueError("Non-compatible goal.")
+
+        if isinstance(metrics_output, list):
+            return [(metrics_output[0], cls.best_score, cls.worst_score), metrics_output[1]] if len(metrics_output) > 1 else [(metrics_output[0], cls.best_score, cls.worst_score)]
+        elif isinstance(metrics_output, dict):
+            for k, v in metrics_output.items():
+                metrics_output[k] = cls._insert_best_worst_score_metrics_output(
+                    v)
+
+            return metrics_output
+
+    @classmethod
+    def _get_attribute_feature_cols(cls, metadata):
+        attribute_cols = metadata['entity_columns'] + \
+            metadata['context_columns']
+        feature_cols = list(
+            set(list(metadata['fields'].keys())) - set(attribute_cols))
+
+        return attribute_cols, feature_cols
+
+    @classmethod
     def _load_attribute_feature(cls, data, metadata=None, entity_columns=None):
         '''Construct `data_attribute` and `data_feature`'''
         attribute_cols = metadata['entity_columns'] + metadata['context_columns']
@@ -78,7 +108,7 @@ class TimeSeriesMetric(BaseMetric):
 
         return data_attribute, data_feature, data_gen_flag
 
-    @classmethod
+    @ classmethod
     def _validate_inputs(
             cls, real_data, synthetic_data, metadata=None, entity_columns=None):
         if set(real_data.columns) != set(synthetic_data.columns):
@@ -107,7 +137,7 @@ class TimeSeriesMetric(BaseMetric):
 
         return metadata, entity_columns
 
-    @classmethod
+    @ classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
                 entity_columns=None):
         """Compute this metric.
@@ -126,6 +156,6 @@ class TimeSeriesMetric(BaseMetric):
 
         Returns:
             Union[float, tuple[float]]:
-                Metric output.
+                Metric output: [(cur_score, best_score, worst_score), fig]
         """
         raise NotImplementedError()

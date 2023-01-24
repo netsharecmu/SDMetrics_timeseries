@@ -106,6 +106,7 @@ information required by the metrics will not be populated.
 
 # TODOs:
 - [x] add README on adding new metrics
+- [ ] Merge multiple plots into one tab
 - [ ] save/load reports including figures and numbers
 - [x] single dataset visualization
 - [ ] Convert matplotlib to plotly

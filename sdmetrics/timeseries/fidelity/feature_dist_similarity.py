@@ -7,60 +7,51 @@ from sdmetrics.timeseries.utils import distribution_similarity
 
 
 class FeatureDistSimilarity(TimeSeriesMetric):
+    """We compute the marginal distribution of values for a single fixed feature f. For example, for the feature key “latitude”, this would compute a distribution over all the latitudes seen in every time series in the dataset. We compare this distribution between synthetic and real data.
+
+    Fix a set of features F={f1,...,fm} whose joint distribution you want to compare. (This can be used to evaluate joint distributions or marginal distributions. If you only want to look at marginals (ie one feature at a time) just let F contain a single feature)."""
+
     name = "Feature distributional similarity"
     goal = Goal.MINIMIZE
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
-                entity_columns=None):
+                entity_columns=None, target=None):
+        if not all(isinstance(s, str) for s in target):
+            raise ValueError(
+                "target has to be a list of strings where each string specifies a feature column.")
+
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
-        attribute_cols = metadata['entity_columns'] + \
-            metadata['context_columns']
-        feature_cols = list(set(real_data.columns) - set(attribute_cols))
+        attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
+        for col in target:
+            if col not in feature_cols:
+                raise ValueError(f"Column {col} is not a feature.")
 
-        scores = {}
-        # From doc, datetime is also a feature and should be added to calculate the
-        # distributional similarity. I cast the timestamp into unix integer
-        # with unit (s)
-        # TODO: multi-feature distribution
-        for column_name in feature_cols:
-            if column_name == metadata["sequence_index"]:
-                real_data[column_name] = pd.to_datetime(
-                    real_data[column_name]).astype(int) / 10**9
-                synthetic_data[column_name] = pd.to_datetime(
-                    synthetic_data[column_name]).astype(int) / 10**9
-            real_column = real_data[column_name].to_numpy().reshape(-1, 1)
-            synthetic_column = synthetic_data[column_name].to_numpy(
-            ).reshape(-1, 1)
+            # Convert datetime to unix timestamp (unit: second) in-place
+            if metadata['fields'][col]['type'] == 'datetime':
+                real_data[col] = pd.to_datetime(
+                    real_data[col]).astype(int) / 10**9
+                synthetic_data[col] = pd.to_datetime(
+                    synthetic_data[col]).astype(int) / 10**9
 
-            if column_name in metadata['fields']:
-                if metadata['fields'][column_name]['type'] in ['categorical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['categorical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-                elif metadata['fields'][column_name]['type'] in ['numerical']:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['numerical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
-                elif column_name == metadata["sequence_index"]:
-                    scores[column_name] = distribution_similarity(
-                        real_data=real_column,
-                        synthetic_data=synthetic_column,
-                        column_names=[column_name],
-                        data_type=['numerical'],
-                        comparison_type='both',
-                        categorical_mapping=True
-                    )
+        if metadata['fields'][target[0]]['type'] in ['numerical', 'datetime']:
+            cls.min_value = 0.0
+            cls.max_value = float("inf")
+        elif metadata['fields'][target[0]]['type'] in ['categorical']:
+            cls.min_value = 0.0
+            cls.max_value = 1.0
 
-        return scores
+        real_columns = real_data[target].to_numpy().reshape(-1, len(target))
+        synthetic_columns = synthetic_data[target].to_numpy(
+        ).reshape(-1, len(target))
+
+        return distribution_similarity(
+            real_data=real_columns,
+            synthetic_data=synthetic_columns,
+            column_names=target,
+            data_type=['numerical'
+                       if metadata['fields'][col]['type'] == 'datetime' else
+                       metadata['fields'][col]['type'] for col in target],
+            comparison_type='both',
+            categorical_mapping=True)

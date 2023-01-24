@@ -63,7 +63,7 @@ def emd(p: np.ndarray, q: np.ndarray):
     elif p.shape[1] > 1:
         use_cuda = torch.cuda.is_available()
         Loss = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8)
-        wass_pq = Loss(torch.from_numpy(p), torch.from_numpy(q))
+        wass_pq = Loss(torch.Tensor(p), torch.Tensor(q))
         if use_cuda:
             torch.cuda.synchronize()
         return wass_pq.item()

@@ -1,94 +1,100 @@
 """Timeseries quality report"""
+import os
 import sys
 import pickle
 import random
 import warnings
 import pkg_resources
+import dash
+import inspect
+import importlib
+import pprint
 
+
+from dash import dcc, html
+from dash.dependencies import Input, Output
 from tqdm import tqdm
-
-from sdmetrics.timeseries import TimeSeriesMetric
-from sdmetrics.timeseries.fidelity import (
-    SingleAttrDistSimilarity,
-    SingleAttrCoverage,
-    SessionLengthDistSimilarity,
-    FeatureDistSimilarity,
-    CrossFeatureCorrelation,
-    InterarrivalDistSimilarity,
-    PerFeatureAutocorrelation,
-    SingleAttrSingleFeatureCorrelation
-)
-
-METRICS = [
-    SingleAttrDistSimilarity,
-    SingleAttrCoverage,
-    SessionLengthDistSimilarity,
-    FeatureDistSimilarity,
-    CrossFeatureCorrelation,
-    InterarrivalDistSimilarity,
-    PerFeatureAutocorrelation,
-    SingleAttrSingleFeatureCorrelation
-]
+from config_io import Config
+from collections import OrderedDict
 
 
 class QualityReport():
-    def _print_scores(self, scores, out):
-        for col, score in scores.items():
-            assert len(score) >= 1, \
-                "At least numerical score has to be generated"
+    def __init__(self, config_file=None):
+        self._config = Config.load_from_file(
+            config_file, default="config_quality_report.json",
+            default_search_paths=[os.path.dirname(
+                inspect.getfile(self.__class__))]
+        )
+        self.graph_idx = 0
 
-            out.write(f"Column: {col}\n")
-            out.write(f"Numeric score: {score[0]}\n")
-            # Display figure
-            if len(score) == 2:
-                score[1].show()
+    # Different metrics have different depths
+    # E.g., `single_attr_dist` has depth=2, `interarrival` has depth=1
+    # TODO: prettier layout
+    def _traverse_metrics_dict(self, metrics_dict, html_children):
+        for main_metric, scores in metrics_dict.items():
+            html_children.append(html.Div(html.H2(main_metric)))
+            if isinstance(scores, list):
+                score = scores[0]
+                if len(scores) > 1:
+                    fig = scores[1]
+                    html_children.append(html.Div([
+                        html.Div("score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                            score[0], score[1], score[2])),
+                        html.Div([
+                            dcc.Graph(
+                                # TODO: better graph index
+                                id=f'graph-{self.graph_idx}',
+                                figure=fig,
+                                style={'width': '100vh'}
+                            )
+                        ])
+                    ]))
+                    self.graph_idx += 1
+                else:
+                    html_children.append(html.Div(
+                        "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                            score[0], score[1], score[2])))
+            else:
+                self._traverse_metrics_dict(scores, html_children)
+
+    def visualize(self):
+        app = dash.Dash(__name__)
+        html_children = []
+        for metric_type, metrics_dict in self.dict_metric_scores.items():
+            html_children.append(html.Div(html.H1(children=metric_type)))
+            self._traverse_metrics_dict(
+                metrics_dict, html_children)
+
+        app.layout = html.Div(children=html_children)
+        app.run_server(debug=True)
 
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
-        for metric in METRICS:
-            out.write("="*80+"\n")
-            out.write(f"Metric: {metric.name}\n")
-            try:
-                self._print_scores(metric.compute(
-                    real_data, synthetic_data, metadata), out)
-            except:
-                attribute_cols = metadata['entity_columns'] + metadata['context_columns']
-                feature_cols = list(set(real_data.columns) -
-                                    set(attribute_cols))
-                if metric == CrossFeatureCorrelation:
-                    self._print_scores(
-                        metric.compute(
-                            real_data, synthetic_data, metadata,
-                            target=random.choices(
-                                [f for f in feature_cols
-                                 if metadata['fields'][f]['type']
-                                 == 'numerical'],
-                                k=2)), out)
+        self.dict_metric_scores = OrderedDict()
 
-                elif metric == PerFeatureAutocorrelation:
-                    self._print_scores(
-                        metric.compute(
-                            real_data, synthetic_data, metadata,
-                            target=random.choice(
-                                [f for f in feature_cols
-                                 if metadata['fields'][f]['type']
-                                 == 'numerical'])), out)
+        for metric_type, metrics in self._config["metrics"].items():
+            # fidelity/privacy
+            metric_module = importlib.import_module(
+                f"sdmetrics.timeseries.{metric_type}")
+            self.dict_metric_scores[metric_type] = OrderedDict()
+            for metric_dict in metrics:
+                metric_name = list(metric_dict.keys())[0]
+                metric_config = list(metric_dict.values())[0]
+                metric_class = getattr(metric_module, metric_config["class"])
+                metric_class_instance = metric_class()
 
-                elif metric == SingleAttrSingleFeatureCorrelation:
-                    self._print_scores(
-                        metric.compute(real_data, synthetic_data, metadata,
-                                       attr_name=random.choice(
-                                           [f for f in attribute_cols
-                                            if metadata['fields'][f]['type']
-                                               == 'categorical']),
-                                       feature_name=random.choice(
-                                           [f for f in feature_cols
-                                            if metadata['fields'][f]['type']
-                                            == 'numerical'])
-                                       ), out)
+                # Metrics that do not have `target` (e.g., session length)
+                if "target_list" not in metric_config:
+                    self.dict_metric_scores[metric_type][metric_name] = metric_class_instance._insert_best_worst_score_metrics_output(
+                        metric_class_instance.compute(real_data, synthetic_data, metadata))
 
+                # Metrics that have `target` (e.g., single attribute distributional similarity)
                 else:
-                    out.write("Metric is not compatible with this dataset.\n")
-            out.write("="*80+"\n\n")
+                    self.dict_metric_scores[metric_type][metric_name] = \
+                        OrderedDict()
+                    for target in metric_config["target_list"]:
+                        self.dict_metric_scores[metric_type][metric_name][
+                            str(target)] = metric_class_instance._insert_best_worst_score_metrics_output(
+                            metric_class_instance.compute(real_data, synthetic_data, metadata, target=target))
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
