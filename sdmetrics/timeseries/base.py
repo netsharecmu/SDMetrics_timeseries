@@ -59,7 +59,7 @@ class TimeSeriesMetric(BaseMetric):
         else:
             raise ValueError("Non-compatible goal.")
 
-        return [(metrics_output[0], cls.best_score, cls.worst_score), metrics_output[1]] if len(metrics_output) > 1 else [(metrics_output, cls.best_score, cls.worst_score)]
+        return [(metrics_output[0], cls.best_score, cls.worst_score), metrics_output[1]] if len(metrics_output) > 1 else [(metrics_output[0], cls.best_score, cls.worst_score)]
 
     @classmethod
     def _get_attribute_feature_cols(cls, metadata):

@@ -51,9 +51,9 @@ class QualityReport():
                     ]))
                     self.graph_idx += 1
                 else:
-                    html.Div(
+                    html_children.append(html.Div(
                         "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
-                            score[0], score[1], score[2]))
+                            score[0], score[1], score[2])))
             else:
                 self._traverse_metrics_dict(scores, html_children)
 
@@ -65,7 +65,7 @@ class QualityReport():
             self._traverse_metrics_dict(
                 metrics_dict, html_children)
 
-        print(html_children)
+        # print(html_children)
 
         app.layout = html.Div(children=html_children)
         app.run_server(debug=True)
@@ -94,7 +94,7 @@ class QualityReport():
                         OrderedDict()
                     for target in metric_config["target_list"]:
                         self.dict_metric_scores[metric_type][metric_name][
-                            tuple(target)] = metric_class.compute(
+                            str(target)] = metric_class.compute(
                             real_data, synthetic_data, metadata, target=target)
 
     def save(self, filepath):
