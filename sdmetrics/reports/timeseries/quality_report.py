@@ -65,8 +65,6 @@ class QualityReport():
             self._traverse_metrics_dict(
                 metrics_dict, html_children)
 
-        # print(html_children)
-
         app.layout = html.Div(children=html_children)
         app.run_server(debug=True)
 
@@ -97,8 +95,6 @@ class QualityReport():
                         self.dict_metric_scores[metric_type][metric_name][
                             str(target)] = metric_class_instance._insert_best_worst_score_metrics_output(
                             metric_class_instance.compute(real_data, synthetic_data, metadata, target=target))
-
-            pprint.pprint(self.dict_metric_scores)
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
