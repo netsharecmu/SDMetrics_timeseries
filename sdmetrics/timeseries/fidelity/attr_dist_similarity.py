@@ -34,7 +34,6 @@ class AttrDistSimilarity(TimeSeriesMetric):
         elif metadata['fields'][target[0]]['type'] in ['categorical']:
             cls.min_value = 0.0
             cls.max_value = 1.0
-        cls._get_best_worst_score()
 
         real_columns = real_data[target].to_numpy().reshape(-1, len(target))
         synthetic_columns = synthetic_data[target].to_numpy(

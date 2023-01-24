@@ -49,18 +49,16 @@ class TimeSeriesMetric(BaseMetric):
     }
 
     @classmethod
-    def _get_best_worst_score(cls):
+    def _insert_best_worst_score_metrics_output(cls, metrics_output):
         if cls.goal == Goal.MINIMIZE:
             cls.best_score = cls.min_value
             cls.worst_score = cls.max_value
-        elif cls.goal == Goal.MINIMIZE:
+        elif cls.goal == Goal.MAXIMIZE:
             cls.best_score = cls.max_value
             cls.worst_score = cls.min_value
         else:
             raise ValueError("Non-compatible goal.")
 
-    @classmethod
-    def _insert_best_worst_score_metrics_output(cls, metrics_output):
         return [(metrics_output[0], cls.best_score, cls.worst_score), metrics_output[1]] if len(metrics_output) > 1 else [(metrics_output, cls.best_score, cls.worst_score)]
 
     @classmethod

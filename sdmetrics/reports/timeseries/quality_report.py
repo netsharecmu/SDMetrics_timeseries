@@ -38,7 +38,7 @@ class QualityReport():
                 if len(scores) > 1:
                     fig = scores[1]
                     html_children.append(html.Div([
-                        html.Div("score:{:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                        html.Div("score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
                             score[0], score[1], score[2])),
                         html.Div([
                             dcc.Graph(
@@ -52,7 +52,7 @@ class QualityReport():
                     self.graph_idx += 1
                 else:
                     html.Div(
-                        "score:{:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                        "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
                             score[0], score[1], score[2]))
             else:
                 self._traverse_metrics_dict(scores, html_children)
