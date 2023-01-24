@@ -45,7 +45,6 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
         real_interarrival_within_flow_list = np.asarray(
             real_interarrival_within_flow_list
         ).reshape(-1, 1)
-        print(real_interarrival_within_flow_list.shape)
         for group_name, df_group in synthetic_gk:
             synthetic_interarrival_within_flow_list += list(
                 np.diff(df_group[column_sequence_index])
@@ -53,7 +52,6 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
         synthetic_interarrival_within_flow_list = np.asarray(
             synthetic_interarrival_within_flow_list
         ).reshape(-1, 1)
-        print(synthetic_interarrival_within_flow_list)
 
         return distribution_similarity(
             real_data=real_interarrival_within_flow_list,
