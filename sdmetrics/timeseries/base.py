@@ -4,6 +4,7 @@ from operator import attrgetter
 
 from sdmetrics.base import BaseMetric
 from sdmetrics.utils import get_columns_from_metadata
+from sdmetrics.goal import Goal
 
 import numpy as np
 
@@ -46,6 +47,17 @@ class TimeSeriesMetric(BaseMetric):
             'type': 'datetime',
         }
     }
+
+    @classmethod
+    def _get_best_worst_score(cls):
+        if cls.goal == Goal.MINIMIZE:
+            cls.best_score = cls.min_value
+            cls.worst_score = cls.max_value
+        elif cls.goal == Goal.MINIMIZE:
+            cls.best_score = cls.max_value
+            cls.worst_score = cls.min_value
+        else:
+            raise ValueError("Non-compatible goal.")
 
     @classmethod
     def _get_attribute_feature_cols(cls, metadata):
@@ -135,6 +147,6 @@ class TimeSeriesMetric(BaseMetric):
 
         Returns:
             Union[float, tuple[float]]:
-                Metric output.
+                Metric output: [(cur_score, best_score, worst_score), fig]
         """
         raise NotImplementedError()

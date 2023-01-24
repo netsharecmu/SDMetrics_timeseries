@@ -28,11 +28,19 @@ class AttrDistSimilarity(TimeSeriesMetric):
             if col not in attribute_cols:
                 raise ValueError(f"Column {col} is not an attribute.")
 
+        if metadata['fields'][target[0]]['type'] in ['numerical', 'datetime']:
+            cls.min_value = 0.0
+            cls.max_value = float("inf")
+        elif metadata['fields'][target[0]]['type'] in ['categorical']:
+            cls.min_value = 0.0
+            cls.max_value = 1.0
+        cls._get_best_worst_score()
+
         real_columns = real_data[target].to_numpy().reshape(-1, len(target))
         synthetic_columns = synthetic_data[target].to_numpy(
         ).reshape(-1, len(target))
 
-        return distribution_similarity(
+        score_plot = distribution_similarity(
             real_data=real_columns,
             synthetic_data=synthetic_columns,
             column_names=target,
@@ -40,3 +48,5 @@ class AttrDistSimilarity(TimeSeriesMetric):
             comparison_type='both',
             categorical_mapping=True
         )
+
+        return [(score_plot[0], cls.best_score, cls.worst_score), score_plot[1]] if len(score_plot) > 1 else [(score_plot[0], cls.best_score, cls.worst_score)]
