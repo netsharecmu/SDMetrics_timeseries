@@ -60,6 +60,10 @@ class TimeSeriesMetric(BaseMetric):
             raise ValueError("Non-compatible goal.")
 
     @classmethod
+    def _insert_best_worst_score_metrics_output(cls, metrics_output):
+        return [(metrics_output[0], cls.best_score, cls.worst_score), metrics_output[1]] if len(metrics_output) > 1 else [(metrics_output, cls.best_score, cls.worst_score)]
+
+    @classmethod
     def _get_attribute_feature_cols(cls, metadata):
         attribute_cols = metadata['entity_columns'] + \
             metadata['context_columns']

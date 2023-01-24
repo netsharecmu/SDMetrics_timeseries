@@ -11,6 +11,8 @@ class SingleAttrCoverage(TimeSeriesMetric):
 
     name = "Single attribute coverage"
     goal = Goal.MAXIMIZE
+    min_value = 0.0
+    max_value = 1.0
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,

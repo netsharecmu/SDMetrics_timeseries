@@ -40,13 +40,11 @@ class AttrDistSimilarity(TimeSeriesMetric):
         synthetic_columns = synthetic_data[target].to_numpy(
         ).reshape(-1, len(target))
 
-        score_plot = distribution_similarity(
-            real_data=real_columns,
-            synthetic_data=synthetic_columns,
-            column_names=target,
-            data_type=[metadata['fields'][col]['type'] for col in target],
-            comparison_type='both',
-            categorical_mapping=True
-        )
-
-        return [(score_plot[0], cls.best_score, cls.worst_score), score_plot[1]] if len(score_plot) > 1 else [(score_plot[0], cls.best_score, cls.worst_score)]
+        return cls._insert_best_worst_score_metrics_output(
+            distribution_similarity(
+                real_data=real_columns,
+                synthetic_data=synthetic_columns,
+                column_names=target,
+                data_type=[metadata['fields'][col]['type'] for col in target],
+                comparison_type='both',
+                categorical_mapping=True))
