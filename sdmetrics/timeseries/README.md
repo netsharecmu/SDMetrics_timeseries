@@ -35,7 +35,7 @@ TimeSeriesMetric.get_subclasses()
 
 ## Usage
 ### Report (a set of metrics)
-Get started with **SDMetrics Reports** using `sunglasses` demo data,
+Get started with **SDMetrics Reports** using `sunglasses` demo data and [configuration file](../reports/timeseries/sunglasses_qr.json)
 
 ```Python
 from sdmetrics.demos import load_timeseries_demo
@@ -49,7 +49,7 @@ my_report.visualize()
 ```
 which will generate a web report containing numerical values and visual plots.
 
-The [default config file](../reports/timeseries/config_quality_report.json) should be override by user's [customized config file](../reports/timeseries/sunglasses_qr.json) when in use. For each metric, e.g., `SingleAttrSimilarity`, the configuration has to specifiy
+The user's [customized config file](../reports/timeseries/sunglasses_qr.json) will override the [default config file](../reports/timeseries/config_quality_report.json) when in use. For each metric, e.g., `SingleAttrSimilarity`, the configuration has to specifiy
 
 - `class`: the Python class that implemented this metric
 - `target_list`: (Optional) specifies the `target column` that the metric would like to be evaluated on.
