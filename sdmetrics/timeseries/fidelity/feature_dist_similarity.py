@@ -7,7 +7,7 @@ from sdmetrics.timeseries.utils import distribution_similarity
 
 
 class FeatureDistSimilarity(TimeSeriesMetric):
-    """We compute the marginal distribution of values for a single fixed feature f. For example, for the feature key “latitude”, this would compute a distribution over all the latitudes seen in every time series in the dataset. We compare this distribution between synthetic and real data. 
+    """We compute the marginal distribution of values for a single fixed feature f. For example, for the feature key “latitude”, this would compute a distribution over all the latitudes seen in every time series in the dataset. We compare this distribution between synthetic and real data.
 
     Fix a set of features F={f1,...,fm} whose joint distribution you want to compare. (This can be used to evaluate joint distributions or marginal distributions. If you only want to look at marginals (ie one feature at a time) just let F contain a single feature)."""
 
@@ -35,16 +35,24 @@ class FeatureDistSimilarity(TimeSeriesMetric):
                 synthetic_data[col] = pd.to_datetime(
                     synthetic_data[col]).astype(int) / 10**9
 
+        if metadata['fields'][target[0]]['type'] in ['numerical', 'datetime']:
+            cls.min_value = 0.0
+            cls.max_value = float("inf")
+        elif metadata['fields'][target[0]]['type'] in ['categorical']:
+            cls.min_value = 0.0
+            cls.max_value = 1.0
+
         real_columns = real_data[target].to_numpy().reshape(-1, len(target))
         synthetic_columns = synthetic_data[target].to_numpy(
         ).reshape(-1, len(target))
 
-        return distribution_similarity(
-            real_data=real_columns,
-            synthetic_data=synthetic_columns,
-            column_names=target,
-            data_type=['numerical'
-                       if metadata['fields'][col]['type'] == 'datetime' else
-                       metadata['fields'][col]['type'] for col in target],
-            comparison_type='both',
-            categorical_mapping=True)
+        return cls._insert_best_worst_score_metrics_output(
+            distribution_similarity(
+                real_data=real_columns,
+                synthetic_data=synthetic_columns,
+                column_names=target,
+                data_type=['numerical'
+                           if metadata['fields'][col]['type'] == 'datetime' else
+                           metadata['fields'][col]['type'] for col in target],
+                comparison_type='both',
+                categorical_mapping=True))
