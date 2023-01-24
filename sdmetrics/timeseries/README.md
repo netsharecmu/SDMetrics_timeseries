@@ -16,11 +16,11 @@ pip3 install -e .
 
 A list of implemented metrics:
 
-- [x] [Single attribute distributional similarity](./fidelity/single_attr_dist_similarity.py)
+- [x] [Attritube distributional similarity (single or multiple)](./fidelity/attr_dist_similarity.py)
 - [x] [Single attirubte coverage](./fidelity/single_attr_coverage.py)
 - [x] [Number of records per object](./fidelity/session_length_dist_similarity.py)
-- [x] [Feature Distribution Similarity](./fidelity/feature_dist_similarity.py)
-- [x] [Cross-Feature Correlations](./fidelity/cross_feature_correlation.py)
+- [x] [Feature distribution similarity (single or multiple)](./fidelity/feature_dist_similarity.py)
+- [x] [Cross-feature correlations](./fidelity/cross_feature_correlation.py)
 - [x] [Per-feature autocorrelation](./fidelity/perfeature_autocorrelation.py)
 - [x] [Inter-arrival time](./fidelity/interarrival_dist_similarity.py)
 - [x] [Qualitative metadata-feature correlation](./fidelity/single_attr_single_feature_correlation.py)
@@ -82,7 +82,7 @@ from sdmetrics.demos import load_timeseries_demo
 from sdmetrics.timeseries import SingleAttrDistSimilarity
 
 real_data, synthetic_data, metadata = load_timeseries_demo()
-scores = SingleAttrDistSimilarity.compute(real_data, synthetic_data, metadata)
+scores = SingleAttrDistSimilarity.compute(real_data, synthetic_data, metadata, target=['region'])
 ```
 
 The output `scores` will contain two parts (if applicable) for each attribute/feature: (1) a numerical number (2) a visualization plot.
