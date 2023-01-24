@@ -26,8 +26,7 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
         synthetic_column = synthetic_sess_length[column_name].to_numpy(
         ).reshape(-1, 1)
 
-        scores = {}
-        scores[column_name] = distribution_similarity(
+        return distribution_similarity(
             real_data=real_column,
             synthetic_data=synthetic_column,
             column_names=[column_name],
@@ -35,4 +34,3 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
             comparison_type='both',
             categorical_mapping=True
         )
-        return scores

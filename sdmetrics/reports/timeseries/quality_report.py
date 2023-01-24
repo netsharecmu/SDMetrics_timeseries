@@ -66,7 +66,7 @@ class QualityReport():
     # E.g., `single_attr_dist` has depth=2, `interarrival` has depth=1
     def _traverse_metrics_dict(self, metrics_dict, html_children):
         for main_metric, scores in metrics_dict.items():
-            html_children.append(html.Div(main_metric))
+            html_children.append(html.Div(html.H2(main_metric)))
             if isinstance(scores, list):  # TODO: check recursive stop
                 score = scores[0]
                 if len(scores) > 1:
@@ -93,6 +93,7 @@ class QualityReport():
         app = dash.Dash(__name__)
         html_children = []
         for metric_type, metrics_dict in self.dict_metric_scores.items():
+            html_children.append(html.Div(html.H1(children=metric_type)))
             self._traverse_metrics_dict(
                 metrics_dict, html_children)
 
