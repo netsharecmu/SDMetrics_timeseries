@@ -27,54 +27,21 @@ class QualityReport():
         )
         self.graph_idx = 0
 
-    def _print_scores(self, scores, out):
-        for col, score in scores.items():
-            assert len(score) >= 1, \
-                "At least numerical score has to be generated"
-
-            out.write(f"Column: {col}\n")
-            out.write(f"Numeric score: {score[0]}\n")
-            # Display figure
-            if len(score) == 2:
-                score[1].show()
-
-    # def visualize(self):
-    #     app = dash.Dash(__name__)
-    #     html_children = []
-    #     for metric, scores in self.dict_metric_scores.items():
-    #         html_children.append(html.Div(
-    #             html.H1(children=metric)))
-    #         for submetric, score_and_plot in scores.items():
-    #             score = score_and_plot[0]
-    #             if len(score_and_plot) > 1:
-    #                 fig = score_and_plot[1]
-    #                 html_children.append(
-    #                     html.Div([
-    #                         html.Div(children=submetric),
-
-    #                         dcc.Graph(
-    #                             id=f'graph-{metric}-{submetric}',
-    #                             figure=fig,
-    #                             style={'width': '100vh'}
-    #                         )
-    #                     ])
-    #                 )
-    #     app.layout = html.Div(children=html_children)
-    #     app.run_server(debug=True)
-
     # Different metrics have different depths
     # E.g., `single_attr_dist` has depth=2, `interarrival` has depth=1
+    # TODO: prettier layout
     def _traverse_metrics_dict(self, metrics_dict, html_children):
         for main_metric, scores in metrics_dict.items():
             html_children.append(html.Div(html.H2(main_metric)))
-            if isinstance(scores, list):  # TODO: check recursive stop
+            if isinstance(scores, list):
                 score = scores[0]
                 if len(scores) > 1:
                     fig = scores[1]
                     html_children.append(html.Div([
-                        html.Div(f"score={score}"),
+                        html.Div("score={:.3f}".format(score)),
                         html.Div([
                             dcc.Graph(
+                                # TODO: better graph index
                                 id=f'graph-{self.graph_idx}',
                                 figure=fig,
                                 style={'width': '100vh'}
@@ -126,11 +93,8 @@ class QualityReport():
                         OrderedDict()
                     for target in metric_config["target_list"]:
                         self.dict_metric_scores[metric_type][metric_name][
-                            str(target)] = metric_class.compute(
+                            tuple(target)] = metric_class.compute(
                             real_data, synthetic_data, metadata, target=target)
-
-        # pprint.pprint(self.dict_metric_scores)
-        # print(self._traverse_metrics_dict(self.dict_metric_scores))
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
