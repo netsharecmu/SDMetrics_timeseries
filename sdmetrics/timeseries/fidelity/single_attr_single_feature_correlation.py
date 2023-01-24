@@ -49,7 +49,7 @@ class SingleAttrSingleFeatureCorrelation(TimeSeriesMetric):
                                ][feature_name].to_numpy().reshape(-1, 1)
             f_syn = synthetic_data[synthetic_data[attr_name] == v
                                    ][feature_name].to_numpy().reshape(-1, 1)
-            scores[v] = distribution_similarity(
+            scores[f"{attr_name}: {v}"] = distribution_similarity(
                 real_data=f_real,
                 synthetic_data=f_syn,
                 column_names=[feature_name],
