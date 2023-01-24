@@ -36,6 +36,13 @@ class SingleAttrSingleFeatureCorrelation(TimeSeriesMetric):
         assert metadata['fields'][attr_name]['type'] == 'categorical', \
             f"attribute needs to be a categorical variable"
 
+        if metadata['fields'][feature_name]['type'] in ['numerical', 'datetime']:
+            cls.min_value = 0.0
+            cls.max_value = float("inf")
+        elif metadata['fields'][feature_name]['type'] in ['categorical']:
+            cls.min_value = 0.0
+            cls.max_value = 1.0
+
         scores = {}
         for v in set(real_data[attr_name]):
             f_real = real_data[real_data[attr_name] == v
