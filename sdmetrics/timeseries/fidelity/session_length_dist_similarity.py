@@ -9,6 +9,8 @@ from sdmetrics.timeseries.utils import distribution_similarity
 class SessionLengthDistSimilarity(TimeSeriesMetric):
     name = "Session length distributional similarity"
     goal = Goal.MINIMIZE
+    min_value = 0.0
+    max_value = float("inf")
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
@@ -26,11 +28,11 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
         synthetic_column = synthetic_sess_length[column_name].to_numpy(
         ).reshape(-1, 1)
 
-        return distribution_similarity(
+        return cls._insert_best_worst_score_metrics_output(distribution_similarity(
             real_data=real_column,
             synthetic_data=synthetic_column,
             column_names=[column_name],
             data_type=['numerical'],
             comparison_type='both',
             categorical_mapping=True
-        )
+        ))

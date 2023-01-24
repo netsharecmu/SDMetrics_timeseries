@@ -97,6 +97,8 @@ class QualityReport():
                             str(target)] = metric_class.compute(
                             real_data, synthetic_data, metadata, target=target)
 
+            pprint.pprint(self.dict_metric_scores)
+
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
 
