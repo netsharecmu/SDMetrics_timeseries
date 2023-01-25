@@ -18,12 +18,12 @@ from config_io import Config
 from collections import OrderedDict
 
 
-class QualityReport():
+class QualityReport:
     def __init__(self, config_file=None):
         self._config = Config.load_from_file(
-            config_file, default="config_quality_report.json",
-            default_search_paths=[os.path.dirname(
-                inspect.getfile(self.__class__))]
+            config_file,
+            default="config_quality_report.json",
+            default_search_paths=[os.path.dirname(inspect.getfile(self.__class__))],
         )
         self.graph_idx = 0
 
@@ -37,23 +37,36 @@ class QualityReport():
                 score = scores[0]
                 if len(scores) > 1:
                     fig = scores[1]
-                    html_children.append(html.Div([
-                        html.Div("score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
-                            score[0], score[1], score[2])),
-                        html.Div([
-                            dcc.Graph(
-                                # TODO: better graph index
-                                id=f'graph-{self.graph_idx}',
-                                figure=fig,
-                                style={'width': '100vh'}
-                            )
-                        ])
-                    ]))
+                    html_children.append(
+                        html.Div(
+                            [
+                                html.Div(
+                                    "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                                        score[0], score[1], score[2]
+                                    )
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Graph(
+                                            # TODO: better graph index
+                                            id=f"graph-{self.graph_idx}",
+                                            figure=fig,
+                                            style={"width": "100vh"},
+                                        )
+                                    ]
+                                ),
+                            ]
+                        )
+                    )
                     self.graph_idx += 1
                 else:
-                    html_children.append(html.Div(
-                        "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
-                            score[0], score[1], score[2])))
+                    html_children.append(
+                        html.Div(
+                            "score: {:.3f} (best: {:.3f}, worst: {:.3f})".format(
+                                score[0], score[1], score[2]
+                            )
+                        )
+                    )
             else:
                 self._traverse_metrics_dict(scores, html_children)
 
@@ -61,9 +74,12 @@ class QualityReport():
         app = dash.Dash(__name__)
         html_children = []
         for metric_type, metrics_dict in self.dict_metric_scores.items():
-            html_children.append(html.Div(html.H1(children=metric_type)))
-            self._traverse_metrics_dict(
-                metrics_dict, html_children)
+            html_children.append(
+                html.Div(
+                    html.H1(children=metric_type),
+                )
+            )
+            self._traverse_metrics_dict(metrics_dict, html_children)
 
         app.layout = html.Div(children=html_children)
         app.run_server(debug=True)
@@ -74,7 +90,8 @@ class QualityReport():
         for metric_type, metrics in self._config["metrics"].items():
             # fidelity/privacy
             metric_module = importlib.import_module(
-                f"sdmetrics.timeseries.{metric_type}")
+                f"sdmetrics.timeseries.{metric_type}"
+            )
             self.dict_metric_scores[metric_type] = OrderedDict()
             for metric_dict in metrics:
                 metric_name = list(metric_dict.keys())[0]
@@ -84,17 +101,29 @@ class QualityReport():
 
                 # Metrics that do not have `target` (e.g., session length)
                 if "target_list" not in metric_config:
-                    self.dict_metric_scores[metric_type][metric_name] = metric_class_instance._insert_best_worst_score_metrics_output(
-                        metric_class_instance.compute(real_data, synthetic_data, metadata))
+                    _real_data = real_data.copy(deep=True)
+                    _synthetic_data = synthetic_data.copy(deep=True)
+                    self.dict_metric_scores[metric_type][
+                        metric_name
+                    ] = metric_class_instance._insert_best_worst_score_metrics_output(
+                        metric_class_instance.compute(
+                            _real_data, _synthetic_data, metadata
+                        )
+                    )
 
                 # Metrics that have `target` (e.g., single attribute distributional similarity)
                 else:
-                    self.dict_metric_scores[metric_type][metric_name] = \
-                        OrderedDict()
+                    self.dict_metric_scores[metric_type][metric_name] = OrderedDict()
                     for target in metric_config["target_list"]:
+                        _real_data = real_data.copy(deep=True)
+                        _synthetic_data = synthetic_data.copy(deep=True)
                         self.dict_metric_scores[metric_type][metric_name][
-                            str(target)] = metric_class_instance._insert_best_worst_score_metrics_output(
-                            metric_class_instance.compute(real_data, synthetic_data, metadata, target=target))
+                            str(target)
+                        ] = metric_class_instance._insert_best_worst_score_metrics_output(
+                            metric_class_instance.compute(
+                                _real_data, _synthetic_data, metadata, target=target
+                            )
+                        )
 
     def save(self, filepath):
         """Save this report instance to the given path using pickle.
@@ -103,10 +132,9 @@ class QualityReport():
             filepath (str):
                 The path to the file where the report instance will be serialized.
         """
-        self._package_version = pkg_resources.get_distribution(
-            'sdmetrics').version
+        self._package_version = pkg_resources.get_distribution("sdmetrics").version
 
-        with open(filepath, 'wb') as output:
+        with open(filepath, "wb") as output:
             pickle.dump(self, output)
 
     @classmethod
@@ -121,14 +149,15 @@ class QualityReport():
             QualityReort:
                 The loaded quality report instance.
         """
-        current_version = pkg_resources.get_distribution('sdmetrics').version
+        current_version = pkg_resources.get_distribution("sdmetrics").version
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             report = pickle.load(f)
             if current_version != report._package_version:
                 warnings.warn(
-                    f'The report was created using SDMetrics version `{report._package_version}` '
-                    f'but you are currently using version `{current_version}`. '
-                    'Some features may not work as intended.')
+                    f"The report was created using SDMetrics version `{report._package_version}` "
+                    f"but you are currently using version `{current_version}`. "
+                    "Some features may not work as intended."
+                )
 
             return report
