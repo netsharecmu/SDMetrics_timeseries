@@ -1,6 +1,7 @@
 """Report utility methods."""
 
 import copy
+import warnings
 import itertools
 
 import numpy as np
@@ -66,6 +67,10 @@ DIAGNOSTIC_REPORT_RESULT_DETAILS = {
     }
 }
 VALID_SDTYPES = ['numerical', 'categorical', 'boolean', 'datetime']
+
+
+def all_same(items):
+    return all(x == items[0] for x in items)
 
 
 def make_venn2_plot(
@@ -256,6 +261,14 @@ def make_continuous_column_plot(real_column, synthetic_column, sdtype):
     Returns:
         plotly.graph_objects._figure.Figure
     """
+
+    # Not generating plots if real column or synthetic column is a constant
+    if all_same(real_column) or all_same(synthetic_column):
+        warnings.warn(
+            f"Real or synthetic column {real_column.name} is a constant list. "
+            f"Not generating plots.")
+        return
+
     column_name = real_column.name if hasattr(real_column, 'name') else ''
     missing_data_real = round(
         (real_column.isna().sum() / len(real_column)) * 100, 2)
