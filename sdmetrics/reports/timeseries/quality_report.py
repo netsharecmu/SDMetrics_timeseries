@@ -35,7 +35,7 @@ class QualityReport:
             html_children.append(html.Div(html.H2(main_metric)))
             if isinstance(scores, list):
                 score = scores[0]
-                if len(scores) > 1:
+                if len(scores) > 1 and scores[1] is not None:  # valid plot
                     fig = scores[1]
                     html_children.append(
                         html.Div(
