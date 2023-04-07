@@ -41,5 +41,5 @@ class SingleAttrCoverage(TimeSeriesMetric):
             synthetic_data=synthetic_columns,
             column_names=target,
             data_type=[metadata['fields'][col]['type'] for col in target],
-            comparison_type='both'
+            comparison_type='quantitative'
         )

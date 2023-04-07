@@ -2,7 +2,11 @@ import warnings
 import numpy as np
 import torch
 from geomloss import SamplesLoss
-from typing import Literal, Optional, Dict, List
+from typing import Optional, Dict, List
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 from collections import Counter, OrderedDict
 from scipy.spatial import distance
 from scipy.stats import wasserstein_distance

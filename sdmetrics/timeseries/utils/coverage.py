@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
-from typing import Literal, Optional, Dict, List
+from typing import Optional, Dict, List
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 from collections import Counter, OrderedDict
 from sdmetrics.reports.utils import make_venn2_plot, make_overlap_range_1d_plot
 

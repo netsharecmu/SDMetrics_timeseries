@@ -3,7 +3,11 @@ import numpy as np
 import pandas as pd
 import torch
 from geomloss import SamplesLoss
-from typing import Literal, Optional, Dict, List
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+from typing import Optional, Dict, List
 from collections import Counter, OrderedDict
 from .distance import jsd, emd
 from sdmetrics.reports.utils import make_discrete_column_plot, make_continuous_column_plot

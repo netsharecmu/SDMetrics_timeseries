@@ -19,12 +19,14 @@ from collections import OrderedDict
 
 
 class QualityReport:
-    def __init__(self, config_file=None):
-        self._config = Config.load_from_file(
-            config_file,
-            default="config_quality_report.json",
-            default_search_paths=[os.path.dirname(inspect.getfile(self.__class__))],
-        )
+    def __init__(self, config_file=None, config_dict=None):
+        if config_dict is not None:
+            self._config = config_dict
+        else:
+            self._config = Config.load_from_file(
+                config_file, default="config_quality_report.json",
+                default_search_paths=[os.path.dirname(
+                    inspect.getfile(self.__class__))],)
         self.graph_idx = 0
 
     # Different metrics have different depths
@@ -82,7 +84,7 @@ class QualityReport:
             self._traverse_metrics_dict(metrics_dict, html_children)
 
         app.layout = html.Div(children=html_children)
-        app.run_server(debug=True)
+        app.run_server(debug=False)
 
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
         self.dict_metric_scores = OrderedDict()
@@ -99,6 +101,8 @@ class QualityReport:
                 metric_class = getattr(metric_module, metric_config["class"])
                 metric_class_instance = metric_class()
 
+                print(metric_name)
+
                 # Metrics that do not have `target` (e.g., session length)
                 if "target_list" not in metric_config:
                     _real_data = real_data.copy(deep=True)
@@ -113,8 +117,10 @@ class QualityReport:
 
                 # Metrics that have `target` (e.g., single attribute distributional similarity)
                 else:
-                    self.dict_metric_scores[metric_type][metric_name] = OrderedDict()
+                    self.dict_metric_scores[metric_type][metric_name] = OrderedDict(
+                    )
                     for target in metric_config["target_list"]:
+                        print("Target:", target)
                         _real_data = real_data.copy(deep=True)
                         _synthetic_data = synthetic_data.copy(deep=True)
                         self.dict_metric_scores[metric_type][metric_name][
@@ -132,7 +138,8 @@ class QualityReport:
             filepath (str):
                 The path to the file where the report instance will be serialized.
         """
-        self._package_version = pkg_resources.get_distribution("sdmetrics").version
+        self._package_version = pkg_resources.get_distribution(
+            "sdmetrics").version
 
         with open(filepath, "wb") as output:
             pickle.dump(self, output)
@@ -157,7 +164,6 @@ class QualityReport:
                 warnings.warn(
                     f"The report was created using SDMetrics version `{report._package_version}` "
                     f"but you are currently using version `{current_version}`. "
-                    "Some features may not work as intended."
-                )
+                    "Some features may not work as intended.")
 
             return report

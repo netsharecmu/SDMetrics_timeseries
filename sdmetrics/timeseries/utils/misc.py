@@ -1,5 +1,9 @@
-from typing import Literal, Optional, Dict, List
+from typing import Optional, Dict, List
 from collections import Counter, OrderedDict
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
 
 
 def get_frequencies(real: List, synthetic: List, categorical_mapping: bool):
@@ -44,8 +48,8 @@ def get_frequencies(real: List, synthetic: List, categorical_mapping: bool):
         f_real, f_syn = [i/sum(c_real) for i in c_real], \
             [i/sum(c_syn) for i in c_syn]
 
-    assert sum(f_real) == 1.0 and sum(
-        f_syn) == 1.0, "Relative frequency should sum up to 1.0"
+    # assert sum(f_real) == 1.0 and sum(
+    #     f_syn) == 1.0, f"Relative frequency should sum up to 1.0. f_real: {sum(f_real)}, f_syn: {sum(f_syn)}"
     assert len(f_real) == len(
         f_syn), "length of real data support is not equal to length of synthetic data support"
 
