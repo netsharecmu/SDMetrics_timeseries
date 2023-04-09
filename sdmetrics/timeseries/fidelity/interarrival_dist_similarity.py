@@ -15,7 +15,8 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
     max_value = float("inf")
 
     @classmethod
-    def compute(cls, real_data, synthetic_data, metadata=None, entity_columns=None):
+    def compute(cls, real_data, synthetic_data, metadata=None,
+                entity_columns=None, configs=None):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns
         )
@@ -25,13 +26,10 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
         column_sequence_index = metadata["sequence_index"]
         # Convert datetime to unix timestamp (unit: second) in-place
         if metadata["fields"][column_sequence_index]["type"] == "datetime":
-            real_data[column_sequence_index] = (
-                pd.to_datetime(real_data[column_sequence_index]).astype(int) / 10**9
-            )
-            synthetic_data[column_sequence_index] = (
-                pd.to_datetime(synthetic_data[column_sequence_index]).astype(int)
-                / 10**9
-            )
+            real_data[column_sequence_index] = (pd.to_datetime(
+                real_data[column_sequence_index]).astype(int) / 10**9)
+            synthetic_data[column_sequence_index] = (pd.to_datetime(
+                synthetic_data[column_sequence_index]).astype(int) / 10**9)
 
         real_gk = real_data.groupby(attribute_cols)
         real_interarrival_within_flow_list = []

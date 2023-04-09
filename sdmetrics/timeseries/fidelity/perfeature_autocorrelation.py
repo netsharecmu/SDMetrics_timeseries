@@ -16,7 +16,7 @@ class PerFeatureAutocorrelation(TimeSeriesMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
-                entity_columns=None, target=None):
+                entity_columns=None, target=None, configs=None):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
 

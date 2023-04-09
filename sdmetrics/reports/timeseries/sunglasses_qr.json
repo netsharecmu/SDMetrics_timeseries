@@ -11,7 +11,10 @@
                         [
                             "region"
                         ]
-                    ]
+                    ],
+                    "configs": {
+                        "categorical_mapping": false
+                    }
                 }
             },
             {

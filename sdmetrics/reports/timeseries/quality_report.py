@@ -111,7 +111,8 @@ class QualityReport:
                         metric_name
                     ] = metric_class_instance._insert_best_worst_score_metrics_output(
                         metric_class_instance.compute(
-                            _real_data, _synthetic_data, metadata
+                            _real_data, _synthetic_data, metadata,
+                            configs=getattr(metric_config, "configs", None)
                         )
                     )
 
@@ -127,7 +128,8 @@ class QualityReport:
                             str(target)
                         ] = metric_class_instance._insert_best_worst_score_metrics_output(
                             metric_class_instance.compute(
-                                _real_data, _synthetic_data, metadata, target=target
+                                _real_data, _synthetic_data, metadata, target=target,
+                                configs=getattr(metric_config, "configs", None)
                             )
                         )
 

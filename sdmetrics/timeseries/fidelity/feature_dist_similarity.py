@@ -16,7 +16,7 @@ class FeatureDistSimilarity(TimeSeriesMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
-                entity_columns=None, target=None):
+                entity_columns=None, target=None, configs=None):
         if not all(isinstance(s, str) for s in target):
             raise ValueError(
                 "target has to be a list of strings where each string specifies a feature column.")
@@ -54,4 +54,4 @@ class FeatureDistSimilarity(TimeSeriesMetric):
                        if metadata['fields'][col]['type'] == 'datetime' else
                        metadata['fields'][col]['type'] for col in target],
             comparison_type='both',
-            categorical_mapping=True)
+            categorical_mapping=getattr(configs, 'categorical_mapping', True))

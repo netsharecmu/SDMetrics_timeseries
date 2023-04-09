@@ -14,7 +14,7 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
 
     @classmethod
     def compute(cls, real_data, synthetic_data, metadata=None,
-                entity_columns=None):
+                entity_columns=None, configs=None):
         _, entity_columns = cls._validate_inputs(
             real_data, synthetic_data, metadata, entity_columns)
         attribute_cols, feature_cols = cls._get_attribute_feature_cols(metadata)
