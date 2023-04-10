@@ -111,9 +111,9 @@ class TimeSeriesMetric(BaseMetric):
     @ classmethod
     def _validate_inputs(
             cls, real_data, synthetic_data, metadata=None, entity_columns=None):
-        if set(real_data.columns) != set(synthetic_data.columns):
+        if not all(synthetic_data.isin(real_data.columns)):
             raise ValueError(
-                '`real_data` and `synthetic_data` must have the same columns')
+                "All columns in `synthetic_data` must be present in `real_data`")
 
         if metadata is not None:
             if not isinstance(metadata, dict):
