@@ -33,6 +33,6 @@ class SessionLengthDistSimilarity(TimeSeriesMetric):
             synthetic_data=synthetic_column,
             column_names=[column_name],
             data_type=['numerical'],
-            comparison_type='both',
+            comparison_type=getattr(configs, 'comparison_type', 'both'),
             categorical_mapping=True
         )

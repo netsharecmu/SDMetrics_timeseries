@@ -44,5 +44,5 @@ class AttrDistSimilarity(TimeSeriesMetric):
             synthetic_data=synthetic_columns,
             column_names=target,
             data_type=[metadata['fields'][col]['type'] for col in target],
-            comparison_type='both',
+            comparison_type=getattr(configs, 'comparison_type', 'both'),
             categorical_mapping=getattr(configs, 'categorical_mapping', True))

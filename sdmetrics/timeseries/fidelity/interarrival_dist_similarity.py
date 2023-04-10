@@ -56,6 +56,6 @@ class InterarrivalDistSimilarity(TimeSeriesMetric):
             synthetic_data=synthetic_interarrival_within_flow_list,
             column_names=["interarrival"],
             data_type=["numerical"],
-            comparison_type="both",
-            categorical_mapping=True,
+            comparison_type=getattr(configs, "comparison_type", "both"),
+            categorical_mapping=True
         )

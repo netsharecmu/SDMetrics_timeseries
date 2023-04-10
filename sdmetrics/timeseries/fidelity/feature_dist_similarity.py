@@ -53,5 +53,5 @@ class FeatureDistSimilarity(TimeSeriesMetric):
             data_type=['numerical'
                        if metadata['fields'][col]['type'] == 'datetime' else
                        metadata['fields'][col]['type'] for col in target],
-            comparison_type='both',
+            comparison_type=getattr(configs, 'comparison_type', 'both'),
             categorical_mapping=getattr(configs, 'categorical_mapping', True))

@@ -54,7 +54,7 @@ class SingleAttrSingleFeatureCorrelation(TimeSeriesMetric):
                 synthetic_data=f_syn,
                 column_names=[feature_name],
                 data_type=[metadata['fields'][feature_name]['type']],
-                comparison_type='both',
+                comparison_type=getattr(configs, 'comparison_type', 'both'),
                 categorical_mapping=True
             )
 
