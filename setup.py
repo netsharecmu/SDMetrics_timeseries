@@ -23,7 +23,8 @@ install_requires = [
     'pykeops>=2.1<3',
     'geomloss>=0.2.5<1',
     'torch',
-    'matplotlib-venn>=0.11.7<1'
+    'matplotlib-venn>=0.11.7<1',
+    'dash'
 ]
 
 pomegranate_requires = [
