@@ -21,7 +21,7 @@ from collections import OrderedDict
 class QualityReport:
     def __init__(self, config_file=None, config_dict=None):
         if config_dict is not None:
-            self._config = config_dict
+            self._config = Config(config_dict)
         else:
             self._config = Config.load_from_file(
                 config_file, default="config_quality_report.json",
@@ -101,8 +101,6 @@ class QualityReport:
                 metric_class = getattr(metric_module, metric_config["class"])
                 metric_class_instance = metric_class()
 
-                print(metric_name)
-
                 # Metrics that do not have `target` (e.g., session length)
                 if "target_list" not in metric_config:
                     _real_data = real_data.copy(deep=True)
@@ -118,10 +116,10 @@ class QualityReport:
 
                 # Metrics that have `target` (e.g., single attribute distributional similarity)
                 else:
-                    self.dict_metric_scores[metric_type][metric_name] = OrderedDict(
-                    )
+                    if metric_name not in self.dict_metric_scores[metric_type]:
+                        self.dict_metric_scores[metric_type][metric_name] = OrderedDict(
+                        )
                     for target in metric_config["target_list"]:
-                        print("Target:", target)
                         _real_data = real_data.copy(deep=True)
                         _synthetic_data = synthetic_data.copy(deep=True)
                         self.dict_metric_scores[metric_type][metric_name][
