@@ -12,6 +12,7 @@ with open('HISTORY.md', encoding='utf-8') as history_file:
     history = history_file.read()
 
 install_requires = [
+    'torch',
     "numpy>=1.18.0,<1.20.0;python_version<'3.7'",
     "numpy>=1.20.0,<2;python_version>='3.7'",
     'pandas>=1.1.3,<2',
@@ -20,10 +21,9 @@ install_requires = [
     'copulas>=0.7.0,<0.8',
     'tqdm>=4.15,<5',
     'plotly>=5.10.0,<6',
-    'pykeops>=2.1<3',
-    'geomloss>=0.2.5<1',
-    'torch',
-    'matplotlib-venn>=0.11.7<1',
+    'pykeops>=2.1,<3',
+    'geomloss>=0.2.5,<1',
+    'matplotlib-venn>=0.11.7,<1',
     'dash'
 ]
 
