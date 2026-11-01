@@ -84,7 +84,7 @@ class QualityReport:
             self._traverse_metrics_dict(metrics_dict, html_children)
 
         app.layout = html.Div(children=html_children)
-        app.run_server(debug=False)
+        app.run(debug=False)
 
     def generate(self, real_data, synthetic_data, metadata, out=sys.stdout):
         self.dict_metric_scores = OrderedDict()
